@@ -44,7 +44,7 @@ const expectPlaceholders = {
   "Error.slotTooLow": ["level"],
   "Error.notStarsteel": ["item", "keyword"],
   "Error.notUnenchanted": ["item"],
-  "Chronicle.Truncated": ["shown", "total"],
+  "Chronicle.Truncated": ["shown"],
   "Spellbook.PillTooltip": ["ordinal", "value", "max", "gain"],
   "Chat.Progress": ["progress", "required", "pct"]
 };

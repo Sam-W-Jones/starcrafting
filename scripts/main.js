@@ -8,7 +8,8 @@ import { esc, report, t } from "./util.js";
 
 Hooks.once("init", () => {
   registerSettings(() => StarforgeApp.refreshAll());
-  loadTemplates([TEMPLATES.logEntry, TEMPLATES.infusionSlot]);
+  // Partials must be preloaded; the chat cards are too, so the first cast doesn't wait on a fetch
+  loadTemplates([TEMPLATES.logEntry, TEMPLATES.infusionSlot, TEMPLATES.chatCast, TEMPLATES.chatComplete]);
 
   const api = {
     /** Open the Starforge: for the given actor, or else the user's controlled token or assigned character */

@@ -116,7 +116,7 @@
       "Entry": "{who} cast {spell} with a {slot} slot (+{value})",
       "EntryPact": "{who} cast {spell} with a pact slot ({slot} level) (+{value})",
       "EntryGM": "{who} set {spell} to {progress} casts",
-      "Truncated": "Showing the {shown} most recent of {total} casts."
+      "Truncated": "Older entries aren't shown; these are the {shown} most recent."
     },
     "Chat": {
       "CastEyebrow": "Starsteel Infusion",

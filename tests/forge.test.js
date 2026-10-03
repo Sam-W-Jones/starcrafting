@@ -178,4 +178,35 @@ await t("crafter-and-GM whisper includes the owners when the GM posts", async ()
   assert.deepEqual(chat.at(-1).whisper.sort(), ["gm", "p2", "u1"]);
   game.user = { id: "u1", name: "Sam", isGM: false }; settings.castChat = "public";
 });
+await t("lock is released before the chat card is posted", async () => {
+  const cuff = addItem(actor, { id: "cuff", name: "Starsteel Cuff", type: "equipment", system: { quantity: 1 } });
+  await F.addItem(actor, cuff);
+  actor.system.spells.spell1.value = 3;
+  const original = ChatMessage.create;
+  let lockedDuringCard = null;
+  ChatMessage.create = async d => { lockedDuringCard = F.isCasting(actor); await wait(30); return original(d); };
+  try {
+    await F.castInto(actor, cuff, shield, "spell1");
+  } finally {
+    ChatMessage.create = original;
+  }
+  assert.equal(lockedDuringCard, false);
+});
+await t("a cast while an edit is saving does nothing, and works once it lands", async () => {
+  const brooch = addItem(actor, { id: "brooch", name: "Starsteel Brooch", type: "equipment", system: { quantity: 1 } });
+  await F.addItem(actor, brooch);
+  const before = actor.system.spells.spell1.value;
+  const edit = F.chooseEtching(brooch, "abj");
+  assert.equal(await F.castInto(actor, brooch, shield, "spell1"), null);
+  await edit;
+  assert.equal(actor.system.spells.spell1.value, before);
+  const cast = await F.castInto(actor, brooch, shield, "spell1");
+  assert.equal(cast.gained, 2);
+  assert.equal(F.getInfusion(brooch).etching, "abj");
+});
+await t("a failed edit releases the lock", async () => {
+  const torc = F.loggedItems(actor).find(i => i.id === "torc");
+  await assert.rejects(F.chooseEtching(torc, "nonsense"), e => e.code === "unknownEtching");
+  assert.equal(F.isCasting(actor), false);
+});
 console.log(`forge: ${n} tests passed`);

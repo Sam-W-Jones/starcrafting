@@ -13,9 +13,10 @@ import {
 } from "./system.js";
 
 /**
- * Crafters with a cast in flight. Foundry updates are not optimistic: until the server answers,
- * the actor still shows the old slot count and the item the old record. So while one cast is
- * saving, any other cast or edit for the same crafter would work from stale data.
+ * Crafters with a write in flight. Foundry updates are not optimistic: until the server answers,
+ * the actor still shows the old slot count and the item the old record. So while one cast or edit
+ * is saving, any other cast or edit for the same crafter would work from stale data.
+ * The lock covers only the writes themselves, never the chat cards that follow.
  */
 const busy = new Set();
 
@@ -23,9 +24,16 @@ function lockKey(document) {
   return document?.actor?.uuid ?? document?.uuid;
 }
 
-/** Refuse to change an item's record while a cast for its crafter is still saving */
-function requireIdle(item) {
-  if ( busy.has(lockKey(item)) ) throw new InfusionError("busy");
+/** Run a record write while holding its crafter's lock, reading the record only once the lock is held */
+async function withLock(document, write) {
+  const key = lockKey(document);
+  if ( busy.has(key) ) throw new InfusionError("busy");
+  busy.add(key);
+  try {
+    return await write();
+  } finally {
+    busy.delete(key);
+  }
 }
 
 /** The item's infusion record, tidied, or null if it has none */
@@ -90,12 +98,13 @@ export async function addItem(actor, item) {
 export async function chooseEtching(item, etching, { force = false } = {}) {
   requireOwner(item);
   if ( force ) requireGM();
-  requireIdle(item);
-  const data = requireRecord(item);
-  if ( data.etching === etching ) return data;
-  const next = setEtching(data, etching, { force });
-  await save(item, next);
-  return next;
+  return withLock(item, async () => {
+    const data = requireRecord(item);
+    if ( data.etching === etching ) return data;
+    const next = setEtching(data, etching, { force });
+    await save(item, next);
+    return next;
+  });
 }
 
 /** Tie one of the actor's castable spells to a slot without casting it */
@@ -106,23 +115,23 @@ export async function bindSpellToSlot(actor, item, index, spell) {
     if ( Number(spell.system?.level) < 1 ) throw new InfusionError("cantripOrInvalid");
     throw new InfusionError("notPrepared", { spell: spell.name });
   }
-  requireIdle(item);
-  const data = requireRecord(item);
-  if ( data.status === "complete" ) throw new InfusionError("itemComplete");
-  const next = bindSpell(data, index, spellSnapshot(spell));
-  await save(item, next);
-  return next;
+  return withLock(item, async () => {
+    const data = requireRecord(item);
+    if ( data.status === "complete" ) throw new InfusionError("itemComplete");
+    const next = bindSpell(data, index, spellSnapshot(spell));
+    await save(item, next);
+    return next;
+  });
 }
 
 /** Empty a slot. Only the GM can empty a slot that already holds casts. */
 export async function unbindSlot(item, index) {
   requireOwner(item);
-  requireIdle(item);
-  const data = requireRecord(item);
-  const force = game.user.isGM;
-  const next = unbindSpell(data, index, { force });
-  await save(item, next);
-  return next;
+  return withLock(item, async () => {
+    const next = unbindSpell(requireRecord(item), index, { force: game.user.isGM });
+    await save(item, next);
+    return next;
+  });
 }
 
 /**
@@ -153,7 +162,8 @@ export function previewCast(actor, item, spell, slotKey) {
 
 /**
  * Cast a spell into an item: spend the slot, record the progress, post the chat cards.
- * If the record can't be saved, the slot is refunded.
+ * If the record can't be saved, the slot is refunded. Returns null, doing nothing, when another
+ * cast or edit for this crafter is still saving (a double-click, say).
  */
 export async function castInto(actor, item, spell, slotKey) {
   requireOwner(actor);
@@ -161,8 +171,9 @@ export async function castInto(actor, item, spell, slotKey) {
   const key = actor.uuid;
   if ( busy.has(key) ) return null;
   busy.add(key);
+  let cast;
   try {
-    const cast = previewCast(actor, item, spell, slotKey);
+    cast = previewCast(actor, item, spell, slotKey);
     await spendSlot(actor, slotKey);
     // A cast always changes the record, so an update that resolves to nothing was rejected
     let saved = null;
@@ -172,12 +183,13 @@ export async function castInto(actor, item, spell, slotKey) {
       if ( !saved ) await refundSlot(actor, slotKey);
     }
     if ( !saved ) throw new InfusionError("noPermission");
-    await postCastCard({ actor, item, data: cast.data, index: cast.index, pool: cast.pool, gained: cast.gained });
-    if ( cast.itemComplete ) await postCompleteCard({ actor, item, data: cast.data });
-    return cast;
   } finally {
+    // Release before the chat round trips, so the re-render the save triggered shows the buttons ready
     busy.delete(key);
   }
+  await postCastCard({ actor, item, data: cast.data, index: cast.index, pool: cast.pool, gained: cast.gained });
+  if ( cast.itemComplete ) await postCompleteCard({ actor, item, data: cast.data });
+  return cast;
 }
 
 /** Whether a cast for this crafter is still saving */
@@ -188,10 +200,11 @@ export function isCasting(actor) {
 /** Take an item out of the log. Players can only do this before the first cast; the GM always can. */
 export async function removeFromLog(item) {
   requireOwner(item);
-  requireIdle(item);
-  const data = getInfusion(item);
-  if ( !game.user.isGM && data && (isLocked(data) || (data.status === "complete")) ) throw new InfusionError("gmOnly");
-  return item.unsetFlag(MODULE_ID, FLAG);
+  return withLock(item, () => {
+    const data = getInfusion(item);
+    if ( !game.user.isGM && data && (isLocked(data) || (data.status === "complete")) ) throw new InfusionError("gmOnly");
+    return item.unsetFlag(MODULE_ID, FLAG);
+  });
 }
 
 /**
@@ -202,15 +215,17 @@ export async function removeFromLog(item) {
  */
 export async function setAllProgress(actor, item, values) {
   requireGM();
-  requireIdle(item);
-  const before = requireRecord(item);
-  let data = before;
-  values.forEach((value, index) => {
-    if ( data.slots[index]?.spell && Number.isFinite(value) ) {
-      data = setProgress(data, index, value, { now: Date.now(), by: game.user.id, byName: game.user.name });
-    }
+  const { before, data } = await withLock(item, async () => {
+    const before = requireRecord(item);
+    let data = before;
+    values.forEach((value, index) => {
+      if ( data.slots[index]?.spell && Number.isFinite(value) ) {
+        data = setProgress(data, index, value, { now: Date.now(), by: game.user.id, byName: game.user.name });
+      }
+    });
+    if ( data !== before ) await save(item, data);
+    return { before, data };
   });
-  await save(item, data);
   if ( (data.status === "complete") && (before.status !== "complete") ) await postCompleteCard({ actor, item, data });
   return data;
 }

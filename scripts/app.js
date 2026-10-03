@@ -87,10 +87,13 @@ export class StarforgeApp extends Application {
     for ( const app of StarforgeApp.instances.values() ) app.refresh();
   }
 
-  /** A render asked for while another is running is dropped by Foundry, so try again shortly */
+  /**
+   * A render asked for while another is running is dropped by Foundry, so try again shortly.
+   * Likewise wait out a write in flight, so the window never settles with its buttons locked.
+   */
   #refresh() {
     if ( !this.rendered && (this._state !== Application.RENDER_STATES.RENDERING) ) return;
-    if ( this._state === Application.RENDER_STATES.RENDERING ) return this.refresh();
+    if ( (this._state === Application.RENDER_STATES.RENDERING) || isCasting(this.actor) ) return this.refresh();
     this.render(false);
   }
 
@@ -248,8 +251,8 @@ export class StarforgeApp extends Application {
       slots,
       castTotal,
       history: data.history.slice(-CHRONICLE_SHOWN).reverse().map(h => ({ when: formatWhen(h.at), text: chronicleText(h) })),
-      historyNote: (castTotal > Math.min(data.history.length, CHRONICLE_SHOWN))
-        ? t("Chronicle.Truncated", { shown: Math.min(data.history.length, CHRONICLE_SHOWN), total: castTotal })
+      historyNote: ((data.history.length > CHRONICLE_SHOWN) || (castTotal > data.history.length))
+        ? t("Chronicle.Truncated", { shown: Math.min(data.history.length, CHRONICLE_SHOWN) })
         : "",
       canRemove: item.isOwner && !locked && !complete
     };
