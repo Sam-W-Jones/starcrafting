@@ -1,0 +1,25 @@
+{
+  "id": "starcrafting",
+  "title": "Starcrafting: The Starforge",
+  "description": "A crafting window where players infuse unenchanted starsteel items with their prepared spells. Drag an item into the forge, choose a runic etching, and cast spells into it from your spellbook, spending real spell slots. A crafting log tracks every item's progress, with 15 casts needed per spell level. Higher slots add progress, a school etching doubles casts of its school, and Mastercrafted items hold two spells.",
+  "version": "1.0.0",
+  "authors": [{ "name": "Sam-W-Jones", "url": "https://github.com/Sam-W-Jones" }],
+  "url": "https://github.com/Sam-W-Jones/starcrafting",
+  "manifest": "https://github.com/Sam-W-Jones/starcrafting/releases/latest/download/module.json",
+  "download": "https://github.com/Sam-W-Jones/starcrafting/releases/download/v1.0.0/module.zip",
+  "bugs": "https://github.com/Sam-W-Jones/starcrafting/issues",
+  "readme": "https://github.com/Sam-W-Jones/starcrafting/blob/main/README.md",
+  "changelog": "https://github.com/Sam-W-Jones/starcrafting/blob/main/CHANGELOG.md",
+  "license": "https://github.com/Sam-W-Jones/starcrafting/blob/main/LICENSE",
+  "compatibility": { "minimum": "11", "verified": "11" },
+  "relationships": {
+    "systems": [
+      { "id": "dnd5e", "type": "system", "compatibility": { "minimum": "2.0.0", "verified": "3.0.4" } }
+    ]
+  },
+  "esmodules": ["scripts/main.js"],
+  "styles": ["styles/starcrafting.css"],
+  "languages": [
+    { "lang": "en", "name": "English", "path": "lang/en.json" }
+  ]
+}

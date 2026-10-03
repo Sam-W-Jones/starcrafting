@@ -1,0 +1,30 @@
+<div class="sc-slot sc-drop{{#if spell}} bound{{else}} empty{{/if}}{{#if complete}} complete{{/if}}{{#if surge}} sc-surge{{/if}}" data-drop="slot" data-slot="{{index}}" data-etching="{{etching}}">
+  <div class="sc-slot-socket">
+    {{#if spell}}
+    <img src="{{spell.img}}" alt="{{spell.name}}">
+    {{else}}
+    <span class="sc-rune" data-rune="none"></span>
+    {{/if}}
+  </div>
+  <div class="sc-slot-body">
+    <div class="sc-slot-head">
+      <span class="sc-slot-label">{{label}}</span>
+      {{#if doubled}}<span class="sc-x2" data-tooltip="{{doubledHint}}">&times;2</span>{{/if}}
+      {{#if complete}}<span class="sc-slot-done"><i class="fas fa-star"></i> {{completeLabel}}</span>{{/if}}
+    </div>
+    {{#if spell}}
+    <div class="sc-slot-spell">{{spell.name}}</div>
+    <div class="sc-slot-meta">{{levelLabel}} &middot; {{schoolLabel}}</div>
+    {{else}}
+    <div class="sc-slot-spell sc-muted">{{emptyLabel}}</div>
+    <div class="sc-slot-meta">{{emptyHint}}</div>
+    {{/if}}
+    <div class="sc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="{{required}}" aria-valuenow="{{progress}}">
+      <div class="sc-bar-fill" style="width: {{pct}}%"></div>
+      <span class="sc-bar-text">{{progressText}}</span>
+    </div>
+  </div>
+  {{#if canUnbind}}
+  <button type="button" class="sc-icon-btn sc-slot-unbind" data-action="unbind" data-slot="{{index}}" data-tooltip="{{unbindLabel}}"><i class="fas fa-xmark"></i></button>
+  {{/if}}
+</div>

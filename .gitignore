@@ -1,0 +1,10 @@
+# Local tooling
+.claude/
+node_modules/
+
+# Build output (CI builds the release zip)
+*.zip
+
+# OS clutter
+Thumbs.db
+.DS_Store

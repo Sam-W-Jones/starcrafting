@@ -1,0 +1,204 @@
+{
+  "STARCRAFTING": {
+    "Title": "The Starforge",
+    "WindowTitle": "Starforge: {name}",
+    "OpenButton": "Starforge",
+    "SceneControl": "Open the Starforge",
+    "SendToForge": "Infuse in the Starforge",
+    "Crafter": "Crafter",
+    "ChooseCrafter": "Choose a crafter",
+    "ChooseCrafterHint": "Whose crafting log should the Starforge open?",
+    "Open": "Open",
+    "NoCrafter": "You need a character to use the Starforge. Ask your GM to assign one, or select your token first.",
+    "Ordinal": {
+      "1": "1st",
+      "2": "2nd",
+      "3": "3rd",
+      "4": "4th",
+      "5": "5th",
+      "6": "6th",
+      "7": "7th",
+      "8": "8th",
+      "9": "9th"
+    },
+    "LevelLabel": "{ordinal} level",
+    "Wells": {
+      "Label": "Spell slots remaining",
+      "None": "No spell slots",
+      "Tooltip": "{label}-level slots: {value} of {max} left",
+      "PactTooltip": "Pact slots ({ordinal} level): {value} of {max} left",
+      "Pact": "Pact"
+    },
+    "Log": {
+      "Title": "Crafting Log",
+      "Empty": "Nothing on the anvil yet. Drop an unenchanted starsteel item into the forge to begin.",
+      "ShowComplete": "Show fully infused items",
+      "HideComplete": "Hide fully infused items",
+      "HiddenComplete": "{count} fully infused item(s) hidden"
+    },
+    "Status": {
+      "infusing": "Infusing",
+      "complete": "Fully infused",
+      "fresh": "Awaiting its first spell"
+    },
+    "Summary": {
+      "Fresh": "Cast a prepared spell from your spellbook to begin the infusion.",
+      "Infusing": "{progress} of {required} casts infused.",
+      "Complete": "Every spell is fully infused. Your GM will tell you what the item can now do."
+    },
+    "Forge": {
+      "Drop": "Drop an unenchanted starsteel item here",
+      "DropHintKeyword": "Drag an item whose name contains \"{keyword}\" from your character's inventory.",
+      "DropHintAny": "Drag any item from your character's inventory.",
+      "OrChoose": "…or choose an item from your crafting log.",
+      "OpenSheet": "Open the item's sheet",
+      "Remove": "Take this item out of the crafting log",
+      "Close": "Put the item back in the log",
+      "Added": "{item} has been placed in the Starforge.",
+      "Removed": "{item} has been taken out of the crafting log.",
+      "RemoveTitle": "Remove from the crafting log",
+      "RemoveContent": "<p>Take <strong>{item}</strong> out of the crafting log?</p>"
+    },
+    "Etching": {
+      "Title": "Runic Etching",
+      "none": {
+        "Name": "No Etching",
+        "Hint": "The starsteel is left bare. Every cast counts once, plus extra for higher-level slots."
+      },
+      "School": {
+        "Name": "{school} Etching",
+        "Hint": "{school} spells cast into this item count double when infusing."
+      },
+      "mastercrafted": {
+        "Name": "Mastercrafted",
+        "Hint": "Masterwork runes let two different spells be infused into this item, each with its own progress."
+      },
+      "Superior": "Etched items may have superior effects when fully infused.",
+      "OneOnly": "An item can bear only one etching. You can change it until the first spell is cast into the item.",
+      "Locked": "The etching is set: it can't change once a spell has been cast into the item.",
+      "LockedNote": "The runes are set. Only the GM can change this etching now.",
+      "GMOverride": "GM override: the etching can be changed even though casts have been made."
+    },
+    "Slot": {
+      "Title": "Infusion",
+      "Single": "Infused spell",
+      "Numbered": "Spell {n}",
+      "Empty": "Empty socket",
+      "EmptyHint": "Cast a spell from your spellbook, or drag one here, to bind it.",
+      "Progress": "{progress} / {required} casts",
+      "ProgressEmpty": "Awaiting a spell",
+      "Complete": "Fully infused",
+      "Unbind": "Unbind this spell",
+      "Bound": "{spell} is now bound to the {item}.",
+      "Unbound": "{spell} has been unbound from the {item}.",
+      "Doubled": "Doubled: this spell matches the item's {etching}"
+    },
+    "Spellbook": {
+      "Title": "Spellbook",
+      "Empty": "No prepared spells of 1st level or higher. Prepare spells on your character sheet to infuse them.",
+      "SelectFirst": "Choose an item in the forge to infuse your spells into it.",
+      "ItemComplete": "This item is fully infused.",
+      "BoundHere": "infusing",
+      "NoSlotsLeft": "No slots left that can cast this spell.",
+      "PillTooltip": "Spend a {ordinal}-level slot ({value} of {max} left): +{gain} progress",
+      "PactPillTooltip": "Spend a pact slot ({ordinal} level, {value} of {max} left): +{gain} progress",
+      "Overflow": "Only {gained} more needed to finish; the rest is lost.",
+      "PactShort": "Pact",
+      "Reason": {
+        "slotsOccupied": "This item's sockets are bound to other spells.",
+        "slotComplete": "This spell is already fully infused here."
+      },
+      "ConfirmTitle": "Infuse {spell}?",
+      "ConfirmContent": "<p>Spend a <strong>{slot}</strong> slot to cast <strong>{spell}</strong> into the <strong>{item}</strong> (+{gain} progress)?</p>"
+    },
+    "Chronicle": {
+      "Title": "Chronicle",
+      "Entry": "{who} cast {spell} with a {slot} slot (+{value})",
+      "EntryPact": "{who} cast {spell} with a pact slot ({slot} level) (+{value})",
+      "EntryGM": "{who} set {spell} to {progress} casts",
+      "Truncated": "Showing the {shown} most recent of {total} casts."
+    },
+    "Chat": {
+      "CastEyebrow": "Starsteel Infusion",
+      "CompleteEyebrow": "Infusion Complete",
+      "CastLine": "<strong>{actor}</strong> channels <strong>{spell}</strong> into the starsteel using a {slot} slot.",
+      "CastLinePact": "<strong>{actor}</strong> channels <strong>{spell}</strong> into the starsteel using a pact slot ({slot} level).",
+      "Progress": "{progress} / {required} casts ({pct}%)",
+      "Bonus": "+{gain}",
+      "BonusDoubled": "+{gain} (doubled by the {etching})",
+      "SlotDone": "{spell} is fully infused!",
+      "CompleteLine": "<strong>{item}</strong> has been fully infused by <strong>{actor}</strong>."
+    },
+    "GM": {
+      "Title": "GM",
+      "EditProgress": "Edit progress",
+      "EditTitle": "Edit infusion: {item}",
+      "EditHint": "Set how many casts each socket holds. Setting a socket to its full amount completes it.",
+      "Save": "Save",
+      "Cancel": "Cancel",
+      "Unlock": "Unlock etching",
+      "Relock": "Lock etching",
+      "Remove": "Remove",
+      "RemoveTitle": "Remove infusion",
+      "RemoveContent": "<p>Remove <strong>{item}</strong> from the crafting log? Its infusion progress will be erased and the item will count as unenchanted again.</p>",
+      "UnbindTitle": "Unbind spell",
+      "UnbindContent": "<p>Unbind <strong>{spell}</strong> and erase its {progress} casts of progress?</p>"
+    },
+    "Error": {
+      "etchingLocked": "The etching can't be changed once a spell has been cast into the item.",
+      "unknownEtching": "That etching doesn't exist.",
+      "cantripOrInvalid": "Only spells of 1st level or higher can be infused.",
+      "alreadyBound": "{spell} is already bound to this item's other socket.",
+      "slotLocked": "This socket is already infusing {spell}.",
+      "noSuchSlot": "That socket doesn't exist.",
+      "slotsOccupied": "This item's sockets are bound to other spells.",
+      "slotComplete": "That spell is already fully infused into this item.",
+      "itemComplete": "This item is already fully infused.",
+      "slotTooLow": "That slot is too low; the spell needs a slot of level {level} or higher.",
+      "noSlotLeft": "You have no slots of that level left.",
+      "notOwned": "Only items from {actor}'s own inventory can go into their Starforge.",
+      "notPhysical": "Only physical items (weapons, armour, gear and so on) can be infused.",
+      "notStarsteel": "{item} isn't starsteel. Only items whose name contains \"{keyword}\" can be infused.",
+      "notUnenchanted": "{item} is already enchanted (it has the Magical property). Only unenchanted starsteel can be infused.",
+      "notSpell": "Only spells can be dropped into a socket.",
+      "spellNeedsSocket": "Drop spells onto one of the item's infusion sockets.",
+      "notYourSpell": "You can only infuse spells from {actor}'s own spellbook.",
+      "notPrepared": "{spell} isn't prepared.",
+      "noItemSelected": "Choose an item in the forge first.",
+      "noPermission": "You don't have permission to change this item.",
+      "busy": "Hold on: the last cast is still settling into the starsteel.",
+      "gmOnly": "Only the GM can do that."
+    },
+    "Settings": {
+      "Keyword": {
+        "Name": "Starsteel keyword",
+        "Hint": "An item counts as starsteel when its name contains this word (not case-sensitive)."
+      },
+      "RequireKeyword": {
+        "Name": "Only starsteel items",
+        "Hint": "When on, only items whose name contains the keyword can be placed in the Starforge. Turn off to allow any physical item."
+      },
+      "RequireMundane": {
+        "Name": "Only unenchanted items",
+        "Hint": "When on, items with dnd5e's Magical property can't be placed in the Starforge. Turn off if your starsteel is magical by nature."
+      },
+      "CastChat": {
+        "Name": "Chat card for each cast",
+        "Hint": "Who sees the chat card posted each time a spell is cast into an item.",
+        "Public": "Everyone",
+        "GM": "The crafter and the GM",
+        "Off": "No chat card"
+      },
+      "CompleteChat": {
+        "Name": "Chat card when an item is complete",
+        "Hint": "Who sees the announcement when an item becomes fully infused.",
+        "Public": "Everyone",
+        "GM": "The crafter and the GM"
+      },
+      "ConfirmCast": {
+        "Name": "Confirm before spending a slot",
+        "Hint": "Ask before each cast in the Starforge spends a spell slot."
+      }
+    }
+  }
+}

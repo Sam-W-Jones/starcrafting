@@ -1,0 +1,19 @@
+<div class="starcrafting-card complete" data-etching="{{etching}}">
+  <header class="sc-card-head">
+    <img class="sc-card-item" src="{{item.img}}" alt="">
+    <div class="sc-card-title">
+      <span class="sc-card-eyebrow">{{localize "STARCRAFTING.Chat.CompleteEyebrow"}}</span>
+      <h3>{{item.name}}</h3>
+    </div>
+  </header>
+  <p class="sc-card-line">{{{line}}}</p>
+  <ul class="sc-card-spells">
+    {{#each spells}}
+    <li><img src="{{img}}" alt=""><span>{{name}}</span><em>{{levelLabel}}</em></li>
+    {{/each}}
+  </ul>
+  {{#if etchingName}}
+  <p class="sc-card-etching"><span class="sc-rune" data-rune="{{etching}}"></span> {{etchingName}}</p>
+  {{/if}}
+  {{#if superior}}<p class="sc-card-superior"><i class="fas fa-star"></i> {{localize "STARCRAFTING.Etching.Superior"}}</p>{{/if}}
+</div>

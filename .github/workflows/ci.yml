@@ -1,0 +1,26 @@
+# Checks every push and pull request: JSON is valid, every script parses, and the test suite passes.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check the manifest and language files are valid JSON
+        run: jq empty module.json lang/*.json
+
+      - name: Check the manifest id matches the module folder name Foundry expects
+        run: test "$(jq -r .id module.json)" = "starcrafting"
+
+      - name: Run the tests
+        run: npm test

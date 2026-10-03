@@ -1,0 +1,18 @@
+<div class="starcrafting-card cast" data-etching="{{etching}}">
+  <header class="sc-card-head">
+    <img class="sc-card-item" src="{{item.img}}" alt="">
+    <img class="sc-card-spell" src="{{spell.img}}" alt="">
+    <div class="sc-card-title">
+      <span class="sc-card-eyebrow">{{localize "STARCRAFTING.Chat.CastEyebrow"}}</span>
+      <h3>{{item.name}}</h3>
+    </div>
+  </header>
+  <p class="sc-card-line">{{{line}}}</p>
+  <div class="sc-bar sc-bar-sm" role="progressbar" aria-valuemin="0" aria-valuemax="{{required}}" aria-valuenow="{{progress}}">
+    <div class="sc-bar-fill" style="width: {{pct}}%"></div>
+  </div>
+  <footer class="sc-card-foot">
+    <span>{{progressText}}</span>
+    {{#if bonus}}<span class="sc-card-bonus">{{bonus}}</span>{{/if}}
+  </footer>
+</div>

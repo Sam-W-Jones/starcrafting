@@ -1,0 +1,28 @@
+<li class="sc-entry{{#if selected}} selected{{/if}}{{#if complete}} complete{{/if}}" data-action="select" data-item-id="{{id}}" data-etching="{{etching}}">
+  <div class="sc-entry-icon">
+    <img src="{{img}}" alt="">
+    <span class="sc-rune-badge" data-etching="{{etching}}" data-tooltip="{{etchingName}}"><span class="sc-rune" data-rune="{{etching}}"></span></span>
+  </div>
+  <div class="sc-entry-body">
+    <div class="sc-entry-head">
+      <span class="sc-entry-name">{{name}}</span>
+      {{#if complete}}<span class="sc-entry-done" data-tooltip="{{statusLabel}}"><i class="fas fa-star"></i></span>{{/if}}
+    </div>
+    {{#each slots}}
+    <div class="sc-entry-slot{{#if complete}} complete{{/if}}">
+      {{#if spell}}
+      <img class="sc-entry-spell" src="{{spell.img}}" alt="" data-tooltip="{{spellTooltip}}">
+      {{else}}
+      <span class="sc-entry-spell empty"><span class="sc-rune" data-rune="none"></span></span>
+      {{/if}}
+      <div class="sc-entry-track">
+        <div class="sc-entry-spell-name">{{#if spell}}{{spell.name}}{{else}}<em>{{emptyLabel}}</em>{{/if}}</div>
+        <div class="sc-bar sc-bar-sm" role="progressbar" aria-valuemin="0" aria-valuemax="{{required}}" aria-valuenow="{{progress}}">
+          <div class="sc-bar-fill" style="width: {{pct}}%"></div>
+        </div>
+      </div>
+      <span class="sc-entry-count">{{#if spell}}{{progress}}/{{required}}{{else}}&mdash;{{/if}}</span>
+    </div>
+    {{/each}}
+  </div>
+</li>

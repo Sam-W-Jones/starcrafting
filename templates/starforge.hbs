@@ -1,0 +1,186 @@
+<div class="sc-root">
+
+  {{!-- Banner: who is crafting, and the spell slots they have left --}}
+  <header class="sc-banner">
+    <div class="sc-crafter">
+      <img class="sc-portrait" src="{{actor.img}}" alt="">
+      <div class="sc-crafter-text">
+        <span class="sc-eyebrow">{{localize "STARCRAFTING.Crafter"}}</span>
+        {{#if crafters}}
+        <select class="sc-crafter-select" data-action="switch-crafter" aria-label="{{localize "STARCRAFTING.Crafter"}}">
+          {{#each crafters}}<option value="{{id}}"{{#if selected}} selected{{/if}}>{{name}}</option>{{/each}}
+        </select>
+        {{else}}
+        <span class="sc-crafter-name">{{actor.name}}</span>
+        {{/if}}
+      </div>
+    </div>
+    <div class="sc-title">
+      <span class="sc-title-flourish"></span>
+      <h1>{{localize "STARCRAFTING.Title"}}</h1>
+      <span class="sc-title-flourish flip"></span>
+    </div>
+    <div class="sc-wells" aria-label="{{localize "STARCRAFTING.Wells.Label"}}">
+      {{#each wells}}
+      <div class="sc-well{{#if pact}} pact{{/if}}{{#unless value}} spent{{/unless}}" data-tooltip="{{tooltip}}">
+        <span class="sc-well-label">{{label}}</span>
+        <span class="sc-well-pips">{{#each pips}}<span class="sc-pip{{#if this}} full{{/if}}"></span>{{/each}}</span>
+      </div>
+      {{else}}
+      <span class="sc-wells-empty">{{localize "STARCRAFTING.Wells.None"}}</span>
+      {{/each}}
+    </div>
+  </header>
+
+  <div class="sc-columns">
+
+    {{!-- Crafting log --}}
+    <section class="sc-panel sc-log sc-drop" data-drop="log">
+      <header class="sc-panel-head">
+        <h2><i class="fas fa-scroll"></i> {{localize "STARCRAFTING.Log.Title"}}</h2>
+        {{#if hasComplete}}
+        <button type="button" class="sc-icon-btn sc-toggle{{#if showComplete}} on{{/if}}" data-action="toggle-complete" data-tooltip="{{completeToggleLabel}}">
+          <i class="fas fa-star"></i>
+        </button>
+        {{/if}}
+      </header>
+      <ol class="sc-log-list">
+        {{#each entries}}{{> "modules/starcrafting/templates/parts/log-entry.hbs"}}{{/each}}
+      </ol>
+      {{#if logEmpty}}
+      <div class="sc-log-empty">
+        <span class="sc-rune" data-rune="mastercrafted"></span>
+        <p>{{localize "STARCRAFTING.Log.Empty"}}</p>
+      </div>
+      {{/if}}
+      {{#if hiddenComplete}}<p class="sc-log-hidden">{{hiddenCompleteLabel}}</p>{{/if}}
+    </section>
+
+    {{!-- The forge: the chosen item, its etching and its infusions --}}
+    <section class="sc-panel sc-forge">
+      {{#if selected}}
+      <div class="sc-forge-body">
+        <div class="sc-item-plate">
+          <div class="sc-item-frame sc-drop{{#if selected.complete}} complete{{/if}}" data-drop="forge" data-etching="{{selected.etching}}">
+            <div class="sc-forge-circle"></div>
+            <img src="{{selected.img}}" alt="">
+          </div>
+          <div class="sc-item-meta">
+            <h2 class="sc-item-name">
+              <a data-action="open-item" data-tooltip="{{localize "STARCRAFTING.Forge.OpenSheet"}}">{{selected.name}}</a>
+            </h2>
+            <div class="sc-status sc-status-{{selected.status}}">{{selected.statusLabel}}</div>
+            <div class="sc-item-summary">{{selected.summary}}</div>
+          </div>
+          <div class="sc-item-actions">
+            {{#if selected.canRemove}}
+            <button type="button" class="sc-icon-btn" data-action="remove" data-tooltip="{{localize "STARCRAFTING.Forge.Remove"}}"><i class="fas fa-trash"></i></button>
+            {{/if}}
+            <button type="button" class="sc-icon-btn" data-action="deselect" data-tooltip="{{localize "STARCRAFTING.Forge.Close"}}"><i class="fas fa-arrow-right-from-bracket"></i></button>
+          </div>
+        </div>
+
+        <div class="sc-section sc-etching">
+          <h3 class="sc-section-title">
+            <span>{{localize "STARCRAFTING.Etching.Title"}}</span>
+            {{#if selected.locked}}<i class="fas fa-lock" data-tooltip="{{localize "STARCRAFTING.Etching.Locked"}}"></i>{{/if}}
+          </h3>
+          <div class="sc-rune-row{{#if selected.etchingFrozen}} frozen{{/if}}" role="radiogroup" aria-label="{{localize "STARCRAFTING.Etching.Title"}}">
+            {{#each etchings}}
+            <button type="button" class="sc-rune-tile{{#if active}} active{{/if}}" role="radio" aria-checked="{{#if active}}true{{else}}false{{/if}}"
+              data-action="etching" data-etching="{{key}}" data-tooltip="{{name}}"{{#if disabled}} disabled{{/if}}>
+              <span class="sc-rune" data-rune="{{key}}"></span>
+            </button>
+            {{/each}}
+          </div>
+          <div class="sc-etching-note" data-etching="{{selected.etching}}">
+            <div class="sc-etching-name">{{etching.name}}</div>
+            <p>{{etching.hint}}</p>
+            {{#if etching.superior}}<p class="sc-superior"><i class="fas fa-star"></i> {{localize "STARCRAFTING.Etching.Superior"}}</p>{{/if}}
+            {{#if selected.locked}}<p class="sc-locked-note"><i class="fas fa-lock"></i> {{selected.lockedNote}}</p>{{else}}<p class="sc-one-only">{{localize "STARCRAFTING.Etching.OneOnly"}}</p>{{/if}}
+          </div>
+        </div>
+
+        <div class="sc-section sc-infusions{{#if selected.master}} two{{/if}}">
+          <h3 class="sc-section-title"><span>{{localize "STARCRAFTING.Slot.Title"}}</span></h3>
+          {{#each selected.slots}}{{> "modules/starcrafting/templates/parts/infusion-slot.hbs"}}{{/each}}
+        </div>
+
+        {{#if selected.history.length}}
+        <details class="sc-section sc-chronicle"{{#if chronicleOpen}} open{{/if}}>
+          <summary class="sc-section-title"><span>{{localize "STARCRAFTING.Chronicle.Title"}}</span> <span class="sc-count">{{selected.castTotal}}</span></summary>
+          <ol>
+            {{#each selected.history}}
+            <li><span class="sc-chronicle-when">{{when}}</span> {{text}}</li>
+            {{/each}}
+          </ol>
+          {{#if selected.historyNote}}<p class="sc-chronicle-note">{{selected.historyNote}}</p>{{/if}}
+        </details>
+        {{/if}}
+
+        {{#if isGM}}
+        <div class="sc-gm">
+          <span class="sc-gm-label"><i class="fas fa-crown"></i> {{localize "STARCRAFTING.GM.Title"}}</span>
+          <button type="button" data-action="gm-progress"><i class="fas fa-sliders"></i> {{localize "STARCRAFTING.GM.EditProgress"}}</button>
+          <button type="button" data-action="gm-unlock"{{#unless selected.locked}} disabled{{/unless}}>
+            <i class="fas fa-{{#if gmUnlocked}}lock-open{{else}}unlock{{/if}}"></i> {{#if gmUnlocked}}{{localize "STARCRAFTING.GM.Relock"}}{{else}}{{localize "STARCRAFTING.GM.Unlock"}}{{/if}}
+          </button>
+          <button type="button" data-action="gm-remove"><i class="fas fa-trash"></i> {{localize "STARCRAFTING.GM.Remove"}}</button>
+        </div>
+        {{/if}}
+      </div>
+      {{else}}
+      <div class="sc-anvil sc-drop" data-drop="forge">
+        <div class="sc-forge-circle large"></div>
+        <div class="sc-anvil-text">
+          <h2>{{localize "STARCRAFTING.Forge.Drop"}}</h2>
+          <p>{{dropHint}}</p>
+          {{#if entries.length}}<p class="sc-muted">{{localize "STARCRAFTING.Forge.OrChoose"}}</p>{{/if}}
+        </div>
+      </div>
+      {{/if}}
+    </section>
+
+    {{!-- Spellbook: prepared spells, with a button for each slot level that can cast them --}}
+    <section class="sc-panel sc-spellbook">
+      <header class="sc-panel-head">
+        <h2><i class="fas fa-book-open"></i> {{localize "STARCRAFTING.Spellbook.Title"}}</h2>
+      </header>
+      {{#if spellbookHint}}<p class="sc-spellbook-hint">{{spellbookHint}}</p>{{/if}}
+      <div class="sc-spell-list">
+        {{#each spellGroups}}
+        <h4 class="sc-spell-level">{{label}}</h4>
+        <ol>
+          {{#each spells}}
+          <li class="sc-spell{{#if disabled}} disabled{{/if}}{{#if bound}} bound{{/if}}{{#if doubled}} doubled{{/if}}" data-spell-id="{{id}}" data-etching="{{school}}">
+            <img class="sc-spell-icon" src="{{img}}" alt="">
+            <div class="sc-spell-text">
+              <span class="sc-spell-name">{{name}}</span>
+              <span class="sc-spell-school">{{schoolLabel}}{{#if bound}} &middot; <em>{{boundLabel}}</em>{{/if}}</span>
+            </div>
+            {{#if doubled}}<span class="sc-x2" data-tooltip="{{doubledHint}}">&times;2</span>{{/if}}
+            {{#if pills.length}}
+            <div class="sc-pills">
+              {{#each pills}}
+              <button type="button" class="sc-pill{{#if pact}} pact{{/if}}" data-action="cast" data-spell-id="{{spellId}}" data-slot-key="{{key}}"
+                data-tooltip="{{tooltip}}"{{#if disabled}} disabled{{/if}}>
+                <span class="sc-pill-level">{{label}}</span><span class="sc-pill-gain">+{{gain}}</span>
+              </button>
+              {{/each}}
+            </div>
+            {{/if}}
+            {{#if reason}}<div class="sc-spell-reason">{{reason}}</div>{{/if}}
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}
+        <div class="sc-spellbook-empty">
+          <span class="sc-rune" data-rune="div"></span>
+          <p>{{localize "STARCRAFTING.Spellbook.Empty"}}</p>
+        </div>
+        {{/each}}
+      </div>
+    </section>
+
+  </div>
+</div>
