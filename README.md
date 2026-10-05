@@ -5,7 +5,7 @@
 ![Foundry v11](https://img.shields.io/badge/Foundry-v11-orange)
 ![dnd5e](https://img.shields.io/badge/dnd5e-2.x%20%7C%203.x-red)
 
-A Foundry VTT v11 module for D&D 5e (dnd5e 2.x and 3.x) that lets players infuse **unenchanted starsteel items** with their prepared spells, over as many sessions as it takes.
+A Foundry VTT v11 module for D&D 5e (dnd5e 2.x and 3.x) that lets players infuse **unenchanted items**, such as starsteel blades or staves of the right wood, with their prepared spells, over as many sessions as it takes.
 
 ## Installation
 
@@ -24,14 +24,14 @@ New versions show up in Foundry's **Update** button on the Add-on Modules tab.
 
 - **Character sheet:** the hammer button in the sheet's title bar. On the dnd5e 3.x sheet it is an icon with a "Starforge" tooltip.
 - **Token controls:** the hammer tool in the left-hand token controls. Foundry only runs these while a scene is active.
-- **Inventory right-click:** choose *Infuse in the Starforge* on a starsteel item.
+- **Inventory right-click:** choose *Infuse in the Starforge* on an item in your inventory. It isn't offered on Magical items while *Only unenchanted items* is on.
 - **Macro:** `game.modules.get("starcrafting").api.open()`. Pass an actor to open a particular crafter's forge: `Starcrafting.open(game.actors.getName("Aria"))`.
 
 With no actor given, the forge opens for the first token you control that you own. If there isn't one, it uses your assigned character. Failing that, it asks which character to use.
 
 ## Crafting
 
-1. **Place an item.** Drag an item from your character's inventory into the forge. By default its name must contain "Starsteel" (the GM can change the keyword), and it can't already be enchanted, meaning it doesn't have dnd5e's Magical property. The item now appears in your **Crafting Log**.
+1. **Place an item.** Drag an item from your character's inventory into the forge. Any physical item can be used, so which materials can take an infusion (starsteel, the right wood, and so on) is left to the table. By default the item can't already be enchanted, meaning it doesn't have dnd5e's Magical property. The item now appears in your **Crafting Log**.
 2. **Choose a runic etching.** Each item can bear one etching, and you can change it until the first spell is cast into the item:
    - **No etching:** every cast counts normally.
    - **School etchings** (Abjuration, Conjuration, Divination, Enchantment, Evocation, Illusion, Necromancy, Transmutation): spells of that school count **double**. Etched items may have superior effects when fully infused.
@@ -71,8 +71,6 @@ Players can unbind a spell, or take an item out of the log, only before any cast
 
 | Setting | Scope | Default |
 |---|---|---|
-| Starsteel keyword | World | `Starsteel` |
-| Only starsteel items (turn off to allow any physical item) | World | On |
 | Only unenchanted items (refuse items with the Magical property) | World | On |
 | Chat card for each cast (everyone / crafter and GM / none) | World | Everyone |
 | Chat card when an item is complete (everyone / crafter and GM) | World | Everyone |

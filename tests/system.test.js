@@ -1,7 +1,7 @@
 // Unit tests for scripts/system.js with dnd5e 3.x- and 2.x-shaped data
 import assert from "node:assert/strict";
 
-const settings = { keyword: "Starsteel", requireKeyword: true };
+const settings = {};
 globalThis.game = {
   settings: { get: (ns, k) => settings[k] },
   i18n: { lang: "en", localize: k => ({ "DND5E.SchoolAbj": "Abjuration" }[k] ?? k) }
@@ -60,9 +60,7 @@ t("physical 3.x DataModel-like", () => {
 t("physical: feat no", () => assert.equal(S.isPhysicalItem({ type: "feat", system: {} }), false));
 t("physical: spell no", () => assert.equal(S.isPhysicalItem({ type: "spell", system: { quantity: 1 } }), false));
 
-t("starsteel keyword", () => { assert.equal(S.isStarsteel({ name: "Longsword (starsteel)" }), true); assert.equal(S.isStarsteel({ name: "Iron Dagger" }), false); });
-t("keyword off", () => { settings.requireKeyword = false; assert.equal(S.isStarsteel({ name: "Iron Dagger" }), true); settings.requireKeyword = true; });
-t("blank keyword = any", () => { settings.keyword = "  "; assert.equal(S.isStarsteel({ name: "Iron Dagger" }), true); settings.keyword = "Starsteel"; });
+t("no name restriction remains", () => { assert.equal(S.isStarsteel, undefined); assert.equal(S.starsteelKeyword, undefined); });
 
 t("canCraft", () => {
   assert.equal(S.canCraft({ type: "character", system: { spells: {} } }), true);

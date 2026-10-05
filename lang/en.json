@@ -31,7 +31,8 @@
     },
     "Log": {
       "Title": "Crafting Log",
-      "Empty": "Nothing on the anvil yet. Drop an unenchanted starsteel item into the forge to begin.",
+      "Empty": "Nothing on the anvil yet. Drop an unenchanted item into the forge to begin.",
+      "EmptyAny": "Nothing on the anvil yet. Drop an item into the forge to begin.",
       "ShowComplete": "Show fully infused items",
       "HideComplete": "Hide fully infused items",
       "HiddenComplete": "{count} fully infused item(s) hidden"
@@ -47,9 +48,9 @@
       "Complete": "Every spell is fully infused. Your GM will tell you what the item can now do."
     },
     "Forge": {
-      "Drop": "Drop an unenchanted starsteel item here",
-      "DropHintKeyword": "Drag an item whose name contains \"{keyword}\" from your character's inventory.",
-      "DropHintAny": "Drag any item from your character's inventory.",
+      "Drop": "Drop an unenchanted item here",
+      "DropAny": "Drop an item here",
+      "DropHint": "Drag an item from your character's inventory.",
       "OrChoose": "…or choose an item from your crafting log.",
       "OpenSheet": "Open the item's sheet",
       "Remove": "Take this item out of the crafting log",
@@ -63,7 +64,7 @@
       "Title": "Runic Etching",
       "none": {
         "Name": "No Etching",
-        "Hint": "The starsteel is left bare. Every cast counts once, plus extra for higher-level slots."
+        "Hint": "The item is left unetched. Every cast counts once, plus extra for higher-level slots."
       },
       "School": {
         "Name": "{school} Etching",
@@ -119,10 +120,10 @@
       "Truncated": "Older entries aren't shown; these are the {shown} most recent."
     },
     "Chat": {
-      "CastEyebrow": "Starsteel Infusion",
+      "CastEyebrow": "Starforge Infusion",
       "CompleteEyebrow": "Infusion Complete",
-      "CastLine": "<strong>{actor}</strong> channels <strong>{spell}</strong> into the starsteel using a {slot} slot.",
-      "CastLinePact": "<strong>{actor}</strong> channels <strong>{spell}</strong> into the starsteel using a pact slot ({slot} level).",
+      "CastLine": "<strong>{actor}</strong> channels <strong>{spell}</strong> into the {item} using a {slot} slot.",
+      "CastLinePact": "<strong>{actor}</strong> channels <strong>{spell}</strong> into the {item} using a pact slot ({slot} level).",
       "Progress": "{progress} / {required} casts ({pct}%)",
       "Bonus": "+{gain}",
       "BonusDoubled": "+{gain} (doubled by the {etching})",
@@ -158,29 +159,20 @@
       "noSlotLeft": "You have no slots of that level left.",
       "notOwned": "Only items from {actor}'s own inventory can go into their Starforge.",
       "notPhysical": "Only physical items (weapons, armour, gear and so on) can be infused.",
-      "notStarsteel": "{item} isn't starsteel. Only items whose name contains \"{keyword}\" can be infused.",
-      "notUnenchanted": "{item} is already enchanted (it has the Magical property). Only unenchanted starsteel can be infused.",
+      "notUnenchanted": "{item} is already enchanted (it has the Magical property). Only unenchanted items can be infused.",
       "notSpell": "Only spells can be dropped into a socket.",
       "spellNeedsSocket": "Drop spells onto one of the item's infusion sockets.",
       "notYourSpell": "You can only infuse spells from {actor}'s own spellbook.",
       "notPrepared": "{spell} isn't prepared.",
       "noItemSelected": "Choose an item in the forge first.",
       "noPermission": "You don't have permission to change this item.",
-      "busy": "Hold on: the last cast is still settling into the starsteel.",
+      "busy": "Hold on: the last cast is still settling into the item.",
       "gmOnly": "Only the GM can do that."
     },
     "Settings": {
-      "Keyword": {
-        "Name": "Starsteel keyword",
-        "Hint": "An item counts as starsteel when its name contains this word (not case-sensitive)."
-      },
-      "RequireKeyword": {
-        "Name": "Only starsteel items",
-        "Hint": "When on, only items whose name contains the keyword can be placed in the Starforge. Turn off to allow any physical item."
-      },
       "RequireMundane": {
         "Name": "Only unenchanted items",
-        "Hint": "When on, items with dnd5e's Magical property can't be placed in the Starforge. Turn off if your starsteel is magical by nature."
+        "Hint": "When on, items with dnd5e's Magical property can't be placed in the Starforge. Turn off if the materials you allow are magical by nature."
       },
       "CastChat": {
         "Name": "Chat card for each cast",

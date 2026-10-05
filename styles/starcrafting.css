@@ -469,7 +469,7 @@
 }
 .starcrafting .sc-bar-fill[style*="100%"],
 .starcrafting-card .sc-bar-fill[style*="100%"] { border-radius: 8px; }
-/* Bare starsteel glows molten gold rather than the grey of the "no etching" rune */
+/* An unetched item glows molten gold rather than the grey of the "no etching" rune */
 .starcrafting [data-etching="none"] .sc-bar-fill,
 .starcrafting-card[data-etching="none"] .sc-bar-fill {
   --rune-color: var(--sc-gold);

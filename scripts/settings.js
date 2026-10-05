@@ -2,26 +2,6 @@ import { MODULE_ID } from "./constants.js";
 
 /** @param {Function} onChange  Called when a setting that affects the Starforge display changes */
 export function registerSettings(onChange) {
-  game.settings.register(MODULE_ID, "keyword", {
-    name: "STARCRAFTING.Settings.Keyword.Name",
-    hint: "STARCRAFTING.Settings.Keyword.Hint",
-    scope: "world",
-    config: true,
-    type: String,
-    default: "Starsteel",
-    onChange
-  });
-
-  game.settings.register(MODULE_ID, "requireKeyword", {
-    name: "STARCRAFTING.Settings.RequireKeyword.Name",
-    hint: "STARCRAFTING.Settings.RequireKeyword.Hint",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true,
-    onChange
-  });
-
   game.settings.register(MODULE_ID, "requireMundane", {
     name: "STARCRAFTING.Settings.RequireMundane.Name",
     hint: "STARCRAFTING.Settings.RequireMundane.Hint",

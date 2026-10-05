@@ -1,7 +1,7 @@
 // Integration tests for scripts/forge.js with mocked documents
 import assert from "node:assert/strict";
 
-const settings = { keyword: "Starsteel", requireKeyword: true, requireMundane: true, castChat: "public", completeChat: "public" };
+const settings = { requireMundane: true, castChat: "public", completeChat: "public" };
 const chat = [];
 globalThis.game = {
   users: [{ id: "u1", isGM: false }, { id: "p2", isGM: false }, { id: "gm", isGM: true }],
@@ -12,7 +12,8 @@ globalThis.game = {
 globalThis.CONFIG = { DND5E: { spellSchools: {}, spellLevels: {}, spellUpcastModes: ["always", "pact", "prepared"] } };
 globalThis.CONST = { CHAT_MESSAGE_TYPES: { OTHER: 0 } };
 globalThis.ChatMessage = { create: async d => { chat.push(d); return d; }, getSpeaker: () => ({}), getWhisperRecipients: () => [{ id: "gm" }] };
-globalThis.renderTemplate = async (path, data) => `${path}`;
+let lastRender = null;
+globalThis.renderTemplate = async (path, data) => { lastRender = data; return `${path}`; };
 
 const F = await import("../scripts/forge.js");
 let n = 0;
@@ -56,7 +57,11 @@ const fireball = addItem(actor, { id: "fireball", name: "Fireball", type: "spell
 
 await t("add starsteel", async () => { const r = await F.addItem(actor, sword); assert.equal(r.added, true); assert.ok(F.getInfusion(sword)); });
 await t("add again returns existing", async () => { const r = await F.addItem(actor, sword); assert.equal(r.added, false); });
-await t("reject iron", async () => { await assert.rejects(F.addItem(actor, dagger), e => e.code === "notStarsteel"); });
+await t("any physical item can be placed, whatever its name", async () => {
+  const staff = addItem(actor, { id: "staff", name: "Yew Quarterstaff", type: "weapon", system: { quantity: 1 } });
+  assert.equal((await F.addItem(actor, staff)).added, true);
+  assert.equal((await F.addItem(actor, dagger)).added, true);
+});
 await t("reject spell as item", async () => { await assert.rejects(F.addItem(actor, shield), e => e.code === "notPhysical"); });
 await t("reject other actor's item", async () => {
   const other = makeActor(); other.uuid = "Actor.b";
@@ -140,7 +145,7 @@ await t("whisper mode", async () => {
   settings.castChat = "off";
   const cards = chat.length; await F.castInto(actor, boots, shield, "spell1"); assert.equal(chat.length, cards);
 });
-await t("loggedItems", async () => assert.deepEqual(F.loggedItems(actor).map(i => i.id).sort(), ["boots", "circlet", "sword"]));
+await t("loggedItems", async () => assert.deepEqual(F.loggedItems(actor).map(i => i.id).sort(), ["boots", "circlet", "dagger", "staff", "sword"]));
 
 await t("casts into two items at once spend one slot each (actor lock)", async () => {
   settings.castChat = "public";
@@ -177,6 +182,16 @@ await t("crafter-and-GM whisper includes the owners when the GM posts", async ()
   await F.castInto(actor, amulet, shield, "spell1");
   assert.deepEqual(chat.at(-1).whisper.sort(), ["gm", "p2", "u1"]);
   game.user = { id: "u1", name: "Sam", isGM: false }; settings.castChat = "public";
+});
+await t("cast card names the item, escaped", async () => {
+  settings.castChat = "public";
+  const staff = addItem(actor, { id: "oakstaff", name: "Oak <Staff>", type: "weapon", system: { quantity: 1 } });
+  await F.addItem(actor, staff);
+  actor.system.spells.spell1.value = 3;
+  await F.castInto(actor, staff, shield, "spell1");
+  const prefix = "STARCRAFTING.Chat.CastLine:";
+  assert.ok(lastRender.line.startsWith(prefix), lastRender.line);
+  assert.equal(JSON.parse(lastRender.line.slice(prefix.length)).item, "Oak &lt;Staff&gt;");
 });
 await t("lock is released before the chat card is posted", async () => {
   const cuff = addItem(actor, { id: "cuff", name: "Starsteel Cuff", type: "equipment", system: { quantity: 1 } });

@@ -50,6 +50,7 @@ export async function postCastCard({ actor, item, data, index, pool, gained }) {
     line: t(pool.pact ? "Chat.CastLinePact" : "Chat.CastLine", {
       actor: esc(actor.name),
       spell: esc(slot.spell.name),
+      item: esc(item.name),
       slot: ordinal(pool.level)
     }) + (progress.complete ? ` <strong>${t("Chat.SlotDone", { spell: esc(slot.spell.name) })}</strong>` : ""),
     pct: progress.pct,

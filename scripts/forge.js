@@ -9,7 +9,7 @@ import {
 } from "./infusion.js";
 import { postCastCard, postCompleteCard } from "./chat.js";
 import {
-  isCastable, isMagical, isPhysicalItem, isStarsteel, refundSlot, slotPools, spellSnapshot, spendSlot, starsteelKeyword
+  isCastable, isMagical, isPhysicalItem, refundSlot, slotPools, spellSnapshot, spendSlot
 } from "./system.js";
 
 /**
@@ -86,7 +86,6 @@ export async function addItem(actor, item) {
   requireOwner(item);
   if ( hasInfusion(item) ) return { item, added: false };
   if ( !isPhysicalItem(item) ) throw new InfusionError("notPhysical");
-  if ( !isStarsteel(item) ) throw new InfusionError("notStarsteel", { item: item.name, keyword: starsteelKeyword() });
   if ( game.settings.get(MODULE_ID, "requireMundane") && isMagical(item) ) {
     throw new InfusionError("notUnenchanted", { item: item.name });
   }

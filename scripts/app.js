@@ -128,6 +128,7 @@ export class StarforgeApp extends Application {
     const hiddenComplete = records.length - visible.length;
 
     const pools = slotPools(actor);
+    const mundaneOnly = game.settings.get(MODULE_ID, "requireMundane");
 
     return {
       actor: { id: actor.id, name: actor.name, img: actor.img },
@@ -150,9 +151,10 @@ export class StarforgeApp extends Application {
       } : null,
       gmUnlocked: selected ? this.gmUnlocked.has(selected.item.id) : false,
       chronicleOpen: this.chronicleOpen,
-      dropHint: game.settings.get(MODULE_ID, "requireKeyword") && game.settings.get(MODULE_ID, "keyword")
-        ? t("Forge.DropHintKeyword", { keyword: game.settings.get(MODULE_ID, "keyword") })
-        : t("Forge.DropHintAny"),
+      // Only promise "unenchanted" while the forge actually requires it
+      dropTitle: t(mundaneOnly ? "Forge.Drop" : "Forge.DropAny"),
+      logEmptyText: t(mundaneOnly ? "Log.Empty" : "Log.EmptyAny"),
+      dropHint: t("Forge.DropHint"),
       spellGroups: this.#spellbookContext(selected, pools),
       spellbookHint: !selected ? t("Spellbook.SelectFirst")
         : (selected.data.status === "complete" ? t("Spellbook.ItemComplete") : "")

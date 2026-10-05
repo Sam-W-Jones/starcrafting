@@ -18,7 +18,7 @@ const walk = dir => {
 walk("templates/");
 
 const used = new Set();
-// Full keys anywhere ("STARCRAFTING.Settings.Keyword.Name", {{localize "STARCRAFTING.Title"}})
+// Full keys anywhere ("STARCRAFTING.Settings.ConfirmCast.Name", {{localize "STARCRAFTING.Title"}})
 for ( const [, src] of [...scripts, ...templates] ) {
   for ( const m of src.matchAll(/"STARCRAFTING\.([A-Za-z0-9.]+)"/g) ) used.add(m[1]);
 }
@@ -42,11 +42,12 @@ assert.deepEqual(missing, [], `Missing from lang/en.json: ${missing.join(", ")}`
 const expectPlaceholders = {
   "WindowTitle": ["name"],
   "Error.slotTooLow": ["level"],
-  "Error.notStarsteel": ["item", "keyword"],
   "Error.notUnenchanted": ["item"],
   "Chronicle.Truncated": ["shown"],
   "Spellbook.PillTooltip": ["ordinal", "value", "max", "gain"],
-  "Chat.Progress": ["progress", "required", "pct"]
+  "Chat.Progress": ["progress", "required", "pct"],
+  "Chat.CastLine": ["actor", "spell", "item", "slot"],
+  "Chat.CastLinePact": ["actor", "spell", "item", "slot"]
 };
 for ( const [key, names] of Object.entries(expectPlaceholders) ) {
   for ( const name of names ) assert.ok(lookup(key).includes(`{${name}}`), `${key} lacks {${name}}`);

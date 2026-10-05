@@ -1,5 +1,5 @@
 /**
- * The rules of starsteel infusion, kept free of Foundry calls so they can be tested on their own.
+ * The rules of spell infusion, kept free of Foundry calls so they can be tested on their own.
  * Every function here takes a plain infusion record and returns a new one; nothing is changed in place.
  *
  * An infusion record (stored at flags.starcrafting.infusion on the item):

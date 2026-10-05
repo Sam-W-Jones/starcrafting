@@ -50,7 +50,7 @@
       {{#if logEmpty}}
       <div class="sc-log-empty">
         <span class="sc-rune" data-rune="mastercrafted"></span>
-        <p>{{localize "STARCRAFTING.Log.Empty"}}</p>
+        <p>{{logEmptyText}}</p>
       </div>
       {{/if}}
       {{#if hiddenComplete}}<p class="sc-log-hidden">{{hiddenCompleteLabel}}</p>{{/if}}
@@ -133,7 +133,7 @@
       <div class="sc-anvil sc-drop" data-drop="forge">
         <div class="sc-forge-circle large"></div>
         <div class="sc-anvil-text">
-          <h2>{{localize "STARCRAFTING.Forge.Drop"}}</h2>
+          <h2>{{dropTitle}}</h2>
           <p>{{dropHint}}</p>
           {{#if entries.length}}<p class="sc-muted">{{localize "STARCRAFTING.Forge.OrChoose"}}</p>{{/if}}
         </div>

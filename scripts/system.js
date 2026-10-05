@@ -1,7 +1,7 @@
 /**
  * Everything that reads or writes dnd5e data lives here, written to work on dnd5e 2.x and 3.x.
  */
-import { MODULE_ID, SCHOOL_FALLBACK_LABELS } from "./constants.js";
+import { SCHOOL_FALLBACK_LABELS } from "./constants.js";
 import { InfusionError, spellKey } from "./infusion.js";
 
 /** Preparation modes that spend spell slots, if the system doesn't say */
@@ -37,14 +37,6 @@ export function isPhysicalItem(item) {
   return !!item?.system && (item.type !== "spell") && ("quantity" in item.system);
 }
 
-/** Starsteel means the name contains the keyword, unless the GM has switched the check off */
-export function isStarsteel(item) {
-  if ( !game.settings.get(MODULE_ID, "requireKeyword") ) return true;
-  const keyword = String(game.settings.get(MODULE_ID, "keyword") ?? "").trim().toLowerCase();
-  if ( !keyword ) return true;
-  return String(item?.name ?? "").toLowerCase().includes(keyword);
-}
-
 /** dnd5e's Magical property: a Set entry on 3.x items, an object key on 2.x weapons */
 export function isMagical(item) {
   const properties = item?.system?.properties;
@@ -52,10 +44,6 @@ export function isMagical(item) {
   if ( typeof properties.has === "function" ) return properties.has("mgc");
   if ( Array.isArray(properties) ) return properties.includes("mgc");
   return !!properties.mgc;
-}
-
-export function starsteelKeyword() {
-  return String(game.settings.get(MODULE_ID, "keyword") ?? "").trim();
 }
 
 /**

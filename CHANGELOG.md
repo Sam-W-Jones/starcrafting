@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+- Any physical item can now go into the Starforge. Starsteel is no longer required, so infusable materials (such as the right wood) are left to the table.
+- The "Starsteel keyword" and "Only starsteel items" settings are gone. "Only unenchanted items" still refuses items with dnd5e's Magical property, and can be turned off.
+- The forge, chat cards and messages no longer assume the item is starsteel. Cast cards now name the item being infused.
+
 ## 1.0.0
 
 First release.

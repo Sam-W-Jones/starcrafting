@@ -1,7 +1,7 @@
 import { MODULE_ID, TEMPLATES } from "./constants.js";
 import { StarforgeApp } from "./app.js";
 import { registerSettings } from "./settings.js";
-import { canCraft, isPhysicalItem, isStarsteel } from "./system.js";
+import { canCraft, isMagical, isPhysicalItem } from "./system.js";
 import { addItem, getInfusion, hasInfusion, loggedItems } from "./forge.js";
 import { castValue, requiredCasts } from "./infusion.js";
 import { esc, report, t } from "./util.js";
@@ -46,7 +46,8 @@ Hooks.on("getActorSheetHeaderButtons", (sheet, buttons) => {
 Hooks.on("dnd5e.getItemContextOptions", (item, menuItems) => {
   const actor = item?.actor;
   if ( !canCraft(actor) || !item.isOwner || !isPhysicalItem(item) ) return;
-  if ( !hasInfusion(item) && !isStarsteel(item) ) return;
+  // Don't offer an item the forge would refuse (unless it is already in the log)
+  if ( !hasInfusion(item) && game.settings.get(MODULE_ID, "requireMundane") && isMagical(item) ) return;
   menuItems.push({
     name: "STARCRAFTING.SendToForge",
     icon: '<i class="fas fa-hammer"></i>',
