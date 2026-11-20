@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.1
+
+- Fixed: spells that weren't ticked as prepared vanished from the Starforge without explanation. This hit spells added after character creation (dnd5e leaves them unticked) and every spell of known-spell casters such as sorcerers.
+- Known-spell casters now count all their spells as prepared. Any class or subclass with a "spells-known" scale (as dnd5e's sorcerer and warlock have) is detected automatically, and the new GM setting "Classes that know their spells" lists others (bard, ranger, sorcerer, warlock, Eldritch Knight and Arcane Trickster by default), matched by identifier or name. Multiclass spells follow their own class when dnd5e 3.3+ has recorded it.
+- Spells that can't be infused are now listed dimmed with the reason (not prepared, or innate, at-will and ritual-only spells that don't use slots) instead of being left out. The eye button in the spellbook header hides them.
+- Which preparation modes use spell slots is read from dnd5e's own config on 3.1+.
+- Trying to bind an un-infusable spell now gives the actual reason.
+
 ## 1.1.0
 
 - Any physical item can now go into the Starforge. Starsteel is no longer required, so infusable materials (such as the right wood) are left to the table.

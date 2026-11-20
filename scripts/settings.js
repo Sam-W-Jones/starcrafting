@@ -1,4 +1,4 @@
-import { MODULE_ID } from "./constants.js";
+import { KNOWN_CASTERS_DEFAULT, MODULE_ID } from "./constants.js";
 
 /** @param {Function} onChange  Called when a setting that affects the Starforge display changes */
 export function registerSettings(onChange) {
@@ -9,6 +9,16 @@ export function registerSettings(onChange) {
     config: true,
     type: Boolean,
     default: true,
+    onChange
+  });
+
+  game.settings.register(MODULE_ID, "knownCasters", {
+    name: "STARCRAFTING.Settings.KnownCasters.Name",
+    hint: "STARCRAFTING.Settings.KnownCasters.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: KNOWN_CASTERS_DEFAULT,
     onChange
   });
 
@@ -37,6 +47,14 @@ export function registerSettings(onChange) {
       gm: "STARCRAFTING.Settings.CompleteChat.GM"
     },
     default: "public"
+  });
+
+  game.settings.register(MODULE_ID, "showUncastable", {
+    scope: "client",
+    config: false,
+    type: Boolean,
+    default: true,
+    onChange
   });
 
   game.settings.register(MODULE_ID, "confirmCast", {

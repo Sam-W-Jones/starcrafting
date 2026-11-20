@@ -33,6 +33,9 @@ export const SCHOOL_FALLBACK_LABELS = {
   trs: "Transmutation"
 };
 
+/** Classes and subclasses that know their spells rather than preparing them (dnd5e identifiers) */
+export const KNOWN_CASTERS_DEFAULT = "bard, ranger, sorcerer, warlock, eldritch-knight, arcane-trickster";
+
 export const TEMPLATES = {
   app: `modules/${MODULE_ID}/templates/starforge.hbs`,
   logEntry: `modules/${MODULE_ID}/templates/parts/log-entry.hbs`,

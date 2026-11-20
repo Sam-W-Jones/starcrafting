@@ -9,7 +9,7 @@ import {
 } from "./infusion.js";
 import { postCastCard, postCompleteCard } from "./chat.js";
 import {
-  isCastable, isMagical, isPhysicalItem, refundSlot, slotPools, spellSnapshot, spendSlot
+  isMagical, isPhysicalItem, refundSlot, slotPools, spellSnapshot, spellStatus, spendSlot
 } from "./system.js";
 
 /**
@@ -72,6 +72,14 @@ function requireRecord(item) {
   return data;
 }
 
+/** Refuse a spell that can't be infused, saying why */
+function requireCastable(spell) {
+  const { castable, reason } = spellStatus(spell);
+  if ( castable ) return;
+  if ( reason === "cantrip" ) throw new InfusionError("cantripOrInvalid");
+  throw new InfusionError(reason, { spell: spell.name });
+}
+
 /** Both documents belong to the same actor (works for unlinked token actors too) */
 function sameActor(a, b) {
   return !!a && !!b && ((a === b) || (a.uuid === b.uuid));
@@ -110,10 +118,7 @@ export async function chooseEtching(item, etching, { force = false } = {}) {
 export async function bindSpellToSlot(actor, item, index, spell) {
   requireOwner(item);
   if ( !sameActor(spell?.parent, actor) ) throw new InfusionError("notYourSpell", { actor: actor.name });
-  if ( !isCastable(spell) ) {
-    if ( Number(spell.system?.level) < 1 ) throw new InfusionError("cantripOrInvalid");
-    throw new InfusionError("notPrepared", { spell: spell.name });
-  }
+  requireCastable(spell);
   return withLock(item, async () => {
     const data = requireRecord(item);
     if ( data.status === "complete" ) throw new InfusionError("itemComplete");
@@ -139,7 +144,7 @@ export async function unbindSlot(item, index) {
  */
 export function previewCast(actor, item, spell, slotKey) {
   if ( !sameActor(spell?.parent, actor) ) throw new InfusionError("notYourSpell", { actor: actor.name });
-  if ( !isCastable(spell) ) throw new InfusionError("notPrepared", { spell: spell.name });
+  requireCastable(spell);
   const data = requireRecord(item);
   if ( data.status === "complete" ) throw new InfusionError("itemComplete");
   const pool = slotPools(actor).find(p => p.key === slotKey);

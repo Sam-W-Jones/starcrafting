@@ -36,7 +36,18 @@ With no actor given, the forge opens for the first token you control that you ow
    - **No etching:** every cast counts normally.
    - **School etchings** (Abjuration, Conjuration, Divination, Enchantment, Evocation, Illusion, Necromancy, Transmutation): spells of that school count **double**. Etched items may have superior effects when fully infused.
    - **Mastercrafted:** the item holds **two** different spells, each with its own socket and progress bar.
-3. **Cast spells into it.** Your spellbook lists your prepared spells of 1st level and up: prepared, always prepared and pact spells. Each spell has a button for every slot level that can cast it, and each button shows how much progress it adds. Clicking one spends that slot. The first cast binds the spell to the item's socket; you can also drag a spell onto a socket to bind it without casting.
+3. **Cast spells into it.** Your spellbook lists your spells of 1st level and up. Each spell you can infuse has a button for every slot level that can cast it, and each button shows how much progress it adds. Clicking one spends that slot. The first cast binds the spell to the item's socket; you can also drag a spell onto a socket to bind it without casting.
+
+### Which spells can be infused
+
+A spell can be infused when it is cast with spell slots and is ready to cast:
+
+- **Prepared casters** (wizard, cleric, druid, paladin and so on): the spell must be ticked as prepared on the character sheet, or be always prepared.
+- **Known-spell casters** (bard, ranger, sorcerer, warlock, Eldritch Knight, Arcane Trickster): every spell counts as prepared, with no tick needed. Any class or subclass with a "spells-known" scale counts automatically, and the GM can list more in the settings (by identifier or name).
+- **Pact magic** spells always count.
+- **Multiclass characters:** a spell that dnd5e 3.3+ has tagged with its class follows that class's rule. Other spells need the tick unless every spellcasting class the character has knows its spells, so a sorcerer/wizard ticks their spells as prepared.
+
+Spells that can't be infused still appear, dimmed, with the reason (for example "Not prepared", or innate, at-will and ritual-only spells that don't use slots). The eye button in the spellbook header hides them. The spellbook updates as soon as a spell is prepared or unprepared on the character sheet.
 
 ### How much progress a cast adds
 
@@ -72,6 +83,7 @@ Players can unbind a spell, or take an item out of the log, only before any cast
 | Setting | Scope | Default |
 |---|---|---|
 | Only unenchanted items (refuse items with the Magical property) | World | On |
+| Classes that know their spells (their spells need no prepared tick) | World | `bard, ranger, sorcerer, warlock, eldritch-knight, arcane-trickster` |
 | Chat card for each cast (everyone / crafter and GM / none) | World | Everyone |
 | Chat card when an item is complete (everyone / crafter and GM) | World | Everyone |
 | Confirm before spending a slot | Client | Off |
@@ -107,7 +119,15 @@ Run the tests with Node 18 or newer:
 npm test
 ```
 
-The `package.json`, `tests/` and `.github/` folders are development tooling only. They are left out of the release zip.
+To see the window without Foundry, run the browser harness, which loads the real module code, templates and CSS against a mocked Foundry and dnd5e. It needs a local Foundry install for core CSS, fonts and icons; set `FOUNDRY_APP` and `FOUNDRY_DATA` if yours isn't in the default place:
+
+```bash
+ELECTRON_RUN_AS_NODE=1 "C:/Program Files/Foundry10/Foundry Virtual Tabletop/Foundry Virtual Tabletop.exe" dev/serve.cjs
+```
+
+Then open http://localhost:8731. The buttons at the bottom switch between a wizard, a sorcerer and a warlock.
+
+The `package.json`, `tests/`, `dev/` and `.github/` folders are development tooling only. They are left out of the release zip.
 
 ### Releasing
 

@@ -91,4 +91,91 @@ t("isMagical", () => {
   assert.equal(S.isMagical({ system: { properties: ["mgc"] } }), true);
   assert.equal(S.isMagical({ system: {} }), false);
 });
+// ---- 1.1.1: known-spell casters and visible reasons ----
+const caster = (identifier, progression = "full", subclass = null) => ({
+  identifier, system: { identifier, spellcasting: { progression } }, spellcasting: { progression },
+  subclass: subclass ? { identifier: subclass, system: { identifier: subclass } } : null
+});
+const spellOf = (actor, level, mode, prepared, extra = {}) => ({ type: "spell", name: "S", actor, system: { level, school: "evo", preparation: { mode, prepared }, ...extra } });
+settings.knownCasters = "bard, ranger, sorcerer, warlock, eldritch-knight, arcane-trickster";
+
+t("sorcerer spells count as prepared without the tick", () => {
+  const sorc = { type: "character", classes: { sorcerer: caster("sorcerer") } };
+  assert.deepEqual(S.spellStatus(spellOf(sorc, 3, "prepared", false)), { castable: true, reason: null });
+});
+t("wizard spells still need the tick", () => {
+  const wiz = { type: "character", classes: { wizard: caster("wizard") } };
+  assert.deepEqual(S.spellStatus(spellOf(wiz, 3, "prepared", false)), { castable: false, reason: "notPrepared" });
+  assert.equal(S.isCastable(spellOf(wiz, 3, "prepared", true)), true);
+});
+t("known subclass (Eldritch Knight) counts", () => {
+  const ek = { type: "character", classes: { fighter: caster("fighter", "third", "eldritch-knight") } };
+  assert.equal(S.isCastable(spellOf(ek, 2, "prepared", false)), true);
+});
+t("non-casting classes are ignored when deciding", () => {
+  const sorcFighter = { type: "character", classes: { sorcerer: caster("sorcerer"), fighter: caster("fighter", "none") } };
+  assert.equal(S.isCastable(spellOf(sorcFighter, 1, "prepared", false)), true);
+});
+t("multiclass without a source class needs the tick", () => {
+  const mc = { type: "character", classes: { sorcerer: caster("sorcerer"), wizard: caster("wizard") } };
+  assert.equal(S.spellStatus(spellOf(mc, 1, "prepared", false)).reason, "notPrepared");
+});
+t("multiclass with dnd5e 3.3 sourceClass follows that class", () => {
+  const mc = { type: "character", classes: { sorcerer: caster("sorcerer"), wizard: caster("wizard") } };
+  assert.equal(S.isCastable(spellOf(mc, 3, "prepared", false, { sourceClass: "sorcerer" })), true);
+  assert.equal(S.isCastable(spellOf(mc, 3, "prepared", false, { sourceClass: "wizard" })), false);
+});
+t("GM can change the known-caster list", () => {
+  const wiz = { type: "character", classes: { wizard: caster("wizard") } };
+  settings.knownCasters = "Wizard";
+  assert.equal(S.isCastable(spellOf(wiz, 1, "prepared", false)), true);
+  settings.knownCasters = "";
+  const sorc = { type: "character", classes: { sorcerer: caster("sorcerer") } };
+  assert.equal(S.isCastable(spellOf(sorc, 1, "prepared", false)), false);
+  settings.knownCasters = "bard, ranger, sorcerer, warlock, eldritch-knight, arcane-trickster";
+});
+t("a class that tracks spells known counts without being listed", () => {
+  settings.knownCasters = "";
+  const cls = caster("hexblade-adept");
+  cls.system.advancement = [{ type: "ScaleValue", configuration: { identifier: "spells-known" } }];
+  assert.equal(S.isCastable(spellOf({ type: "character", classes: { "hexblade-adept": cls } }, 2, "prepared", false)), true);
+  const titled = caster("rune-singer");
+  titled.system.advancement = [{ type: "ScaleValue", title: "Spells Known", configuration: {} }];
+  assert.equal(S.isCastable(spellOf({ type: "character", classes: { "rune-singer": titled } }, 1, "prepared", false)), true);
+  const other = caster("cleric");
+  other.system.advancement = [{ type: "ScaleValue", configuration: { identifier: "channel-divinity" } }];
+  assert.equal(S.isCastable(spellOf({ type: "character", classes: { cleric: other } }, 1, "prepared", false)), false);
+  settings.knownCasters = "bard, ranger, sorcerer, warlock, eldritch-knight, arcane-trickster";
+});
+t("known casters match by name when the identifier is custom", () => {
+  const ek = caster("fighter", "third", "ek-homebrew");
+  ek.subclass.name = "Eldritch Knight";
+  assert.equal(S.isCastable(spellOf({ type: "character", classes: { fighter: ek } }, 1, "prepared", false)), true);
+});
+t("actor with no classes needs the tick", () => {
+  assert.equal(S.spellStatus(spellOf({ type: "character" }, 1, "prepared", false)).reason, "notPrepared");
+});
+t("modes without slots give the noSlots reason", () => {
+  assert.equal(S.spellStatus(spellOf({ type: "character" }, 2, "innate", true)).reason, "noSlots");
+  assert.equal(S.spellStatus(spellOf({ type: "character" }, 1, "atwill", true)).reason, "noSlots");
+});
+t("dnd5e 3.1+ mode config with upcast flags (incl. 3.2 ritual)", () => {
+  const before = CONFIG.DND5E.spellPreparationModes;
+  CONFIG.DND5E.spellPreparationModes = {
+    prepared: { label: "P", upcast: true, prepares: true }, pact: { label: "Pa", upcast: true },
+    always: { label: "A", upcast: true, prepares: true }, atwill: { label: "W" }, innate: { label: "I" }, ritual: { label: "R" }
+  };
+  const upcast = CONFIG.DND5E.spellUpcastModes; delete CONFIG.DND5E.spellUpcastModes;
+  assert.equal(S.usesSlots("prepared"), true); assert.equal(S.usesSlots("pact"), true); assert.equal(S.usesSlots("always"), true);
+  assert.equal(S.usesSlots("ritual"), false); assert.equal(S.usesSlots("innate"), false); assert.equal(S.usesSlots("atwill"), false);
+  CONFIG.DND5E.spellPreparationModes = before; CONFIG.DND5E.spellUpcastModes = upcast;
+});
+t("spellbook lists every leveled spell, castable first within a level", () => {
+  const wiz = { type: "character", classes: { wizard: caster("wizard") } };
+  const items = [spellOf(wiz, 3, "prepared", false), spellOf(wiz, 1, "prepared", true), spellOf(wiz, 0, "prepared", true), spellOf(wiz, 3, "prepared", true)];
+  items.forEach((it, i) => { it.name = "S" + i; });
+  const actor = { items: { filter: fn => items.filter(fn) } };
+  const list = S.spellbookSpells(actor).map(e => [e.spell.name, e.spell.system.level, e.status.castable]);
+  assert.deepEqual(list, [["S1", 1, true], ["S3", 3, true], ["S0", 3, false]]);
+});
 console.log(`system: ${n} tests passed`);

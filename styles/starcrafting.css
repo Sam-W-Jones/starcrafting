@@ -1249,6 +1249,15 @@
   background: linear-gradient(90deg, rgba(217, 180, 103, 0.14), rgba(0, 0, 0, 0.3) 70%);
 }
 .starcrafting .sc-spell.disabled { opacity: 0.5; }
+.starcrafting .sc-spell.uncastable { opacity: 0.42; cursor: default; }
+.starcrafting .sc-spell.uncastable .sc-spell-icon { filter: grayscale(0.8); }
+.starcrafting .sc-spellbook-hidden {
+  padding: 8px 4px 2px;
+  text-align: center;
+  font-size: var(--font-size-11, 0.6875rem);
+  font-style: italic;
+  color: var(--sc-muted);
+}
 .starcrafting .sc-spell-icon {
   grid-area: icon;
   width: 34px;

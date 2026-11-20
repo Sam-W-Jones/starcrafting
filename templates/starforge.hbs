@@ -145,6 +145,9 @@
     <section class="sc-panel sc-spellbook">
       <header class="sc-panel-head">
         <h2><i class="fas fa-book-open"></i> {{localize "STARCRAFTING.Spellbook.Title"}}</h2>
+        <button type="button" class="sc-icon-btn sc-toggle{{#if showUncastable}} on{{/if}}" data-action="toggle-uncastable" data-tooltip="{{uncastableToggleLabel}}">
+          <i class="fas fa-eye{{#unless showUncastable}}-slash{{/unless}}"></i>
+        </button>
       </header>
       {{#if spellbookHint}}<p class="sc-spellbook-hint">{{spellbookHint}}</p>{{/if}}
       <div class="sc-spell-list">
@@ -152,7 +155,7 @@
         <h4 class="sc-spell-level">{{label}}</h4>
         <ol>
           {{#each spells}}
-          <li class="sc-spell{{#if disabled}} disabled{{/if}}{{#if bound}} bound{{/if}}{{#if doubled}} doubled{{/if}}" data-spell-id="{{id}}" data-etching="{{school}}">
+          <li class="sc-spell{{#if disabled}} disabled{{/if}}{{#if uncastable}} uncastable{{/if}}{{#if bound}} bound{{/if}}{{#if doubled}} doubled{{/if}}" data-spell-id="{{id}}" data-etching="{{school}}">
             <img class="sc-spell-icon" src="{{img}}" alt="">
             <div class="sc-spell-text">
               <span class="sc-spell-name">{{name}}</span>
@@ -174,11 +177,14 @@
           {{/each}}
         </ol>
         {{else}}
+        {{#unless hiddenUncastableLabel}}
         <div class="sc-spellbook-empty">
           <span class="sc-rune" data-rune="div"></span>
           <p>{{localize "STARCRAFTING.Spellbook.Empty"}}</p>
         </div>
+        {{/unless}}
         {{/each}}
+        {{#if hiddenUncastableLabel}}<p class="sc-spellbook-hidden">{{hiddenUncastableLabel}}</p>{{/if}}
       </div>
     </section>
 

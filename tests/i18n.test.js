@@ -30,7 +30,7 @@ for ( const [, src] of scripts ) {
 // Keys built at runtime
 const errorCodes = new Set();
 for ( const [, src] of scripts ) for ( const m of src.matchAll(/InfusionError\(\s*"([A-Za-z]+)"/g) ) errorCodes.add(m[1]);
-for ( const reason of ["slotsOccupied", "slotComplete"] ) { errorCodes.add(reason); used.add(`Spellbook.Reason.${reason}`); }
+for ( const reason of ["slotsOccupied", "slotComplete", "notPrepared", "noSlots"] ) { errorCodes.add(reason); used.add(`Spellbook.Reason.${reason}`); }
 for ( const code of errorCodes ) used.add(`Error.${code}`);
 for ( const status of ["infusing", "complete", "fresh"] ) used.add(`Status.${status}`);
 for ( let n = 1; n <= 9; n++ ) used.add(`Ordinal.${n}`);

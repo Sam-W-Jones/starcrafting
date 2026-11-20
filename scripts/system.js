@@ -1,7 +1,7 @@
 /**
  * Everything that reads or writes dnd5e data lives here, written to work on dnd5e 2.x and 3.x.
  */
-import { SCHOOL_FALLBACK_LABELS } from "./constants.js";
+import { KNOWN_CASTERS_DEFAULT, MODULE_ID, SCHOOL_FALLBACK_LABELS } from "./constants.js";
 import { InfusionError, spellKey } from "./infusion.js";
 
 /** Preparation modes that spend spell slots, if the system doesn't say */
@@ -47,24 +47,104 @@ export function isMagical(item) {
 }
 
 /**
- * A spell can be cast into an item if it is 1st level or higher and is a spell that spends slots
- * and is ready to cast: always prepared, a pact spell, or a prepared spell that is checked as prepared.
- * NPC spells count as prepared, as they do on dnd5e's own sheet.
+ * Whether spells of this preparation mode are cast with spell slots.
+ * dnd5e 3.1+ flags each mode with `upcast`; 3.0 and 2.x list the slot modes in spellUpcastModes.
  */
-export function isCastable(spell) {
-  if ( spell?.type !== "spell" ) return false;
-  if ( toInt(spell.system?.level) < 1 ) return false;
-  const mode = spell.system?.preparation?.mode || "prepared";
-  const slotModes = CONFIG.DND5E?.spellUpcastModes ?? SLOT_MODES_FALLBACK;
-  if ( !slotModes.includes(mode) ) return false;
-  if ( mode !== "prepared" ) return true;
-  return !!spell.system.preparation?.prepared || (spell.actor?.type === "npc");
+export function usesSlots(mode) {
+  const config = CONFIG.DND5E?.spellPreparationModes?.[mode];
+  if ( config && (typeof config === "object") && ("upcast" in config) ) return !!config.upcast;
+  return (CONFIG.DND5E?.spellUpcastModes ?? SLOT_MODES_FALLBACK).includes(mode);
 }
 
-/** The actor's castable spells, lowest level first, then by name */
-export function castableSpells(actor) {
-  return (actor?.items?.filter(isCastable) ?? [])
-    .sort((a, b) => (toInt(a.system.level) - toInt(b.system.level)) || a.name.localeCompare(b.name, game.i18n.lang));
+/** "Eldritch Knight" -> "eldritch-knight", matching how dnd5e derives identifiers from names */
+function slug(text) {
+  return String(text ?? "").trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
+}
+
+/** Classes and subclasses the GM has listed as knowing their spells rather than preparing them */
+export function knownCasterIdentifiers() {
+  let raw = KNOWN_CASTERS_DEFAULT;
+  try {
+    raw = game.settings.get(MODULE_ID, "knownCasters");
+  } catch {
+    // Not registered yet (e.g. during startup): use the default list
+  }
+  return new Set(String(raw ?? "").split(",").map(slug).filter(Boolean));
+}
+
+/** Whether a class or subclass tracks spells known, as dnd5e's SRD sorcerer and warlock do with a "spells-known" scale */
+function tracksSpellsKnown(item) {
+  const advancement = item?.system?.advancement;
+  const list = Array.isArray(advancement) ? advancement : Object.values(advancement ?? {});
+  return list.some(a => (a?.type === "ScaleValue")
+    && (slug(a.configuration?.identifier || a.identifier || a.title) === "spells-known"));
+}
+
+/** The actor's spellcasting classes: the names each answers to, and whether it tracks spells known */
+function spellcastingClasses(actor) {
+  const casters = [];
+  for ( const cls of Object.values(actor?.classes ?? {}) ) {
+    const subclass = cls.subclass ?? null;
+    const progression = cls.spellcasting?.progression
+      ?? subclass?.system?.spellcasting?.progression ?? cls.system?.spellcasting?.progression;
+    if ( !progression || (progression === "none") ) continue;
+    const id = slug(cls.identifier || cls.system?.identifier || cls.name);
+    const names = [id, cls.name, subclass?.identifier, subclass?.system?.identifier, subclass?.name].map(slug).filter(Boolean);
+    casters.push({ id, names, tracksKnown: tracksSpellsKnown(cls) || tracksSpellsKnown(subclass) });
+  }
+  return casters;
+}
+
+/**
+ * A spell counts as known (so needs no "prepared" tick) when it comes from a known-spell caster: one the GM
+ * has listed (by identifier or name), or one whose class or subclass tracks spells known.
+ * dnd5e 3.3+ can record a spell's class; a spell without one counts only if every spellcasting class
+ * the actor has knows its spells, so a multiclass sorcerer/wizard still ticks spells as prepared.
+ */
+export function isKnownSpell(spell) {
+  const casters = spellcastingClasses(spell?.actor);
+  if ( !casters.length ) return false;
+  const known = knownCasterIdentifiers();
+  const isKnownCaster = c => c.tracksKnown || c.names.some(name => known.has(name));
+  const source = slug(spell.system?.sourceClass);
+  if ( source ) {
+    const caster = casters.find(c => c.id === source);
+    if ( caster ) return isKnownCaster(caster);
+  }
+  return casters.every(isKnownCaster);
+}
+
+/**
+ * Whether a spell can be cast into an item, and if not, why not.
+ * Castable means 1st level or higher, cast with spell slots, and ready to cast: always prepared,
+ * a pact spell, ticked as prepared, from a known-spell caster, or an NPC's (as on dnd5e's own sheet).
+ * @returns {{castable: boolean, reason: string|null}}  reason: "cantrip", "noSlots" or "notPrepared"
+ */
+export function spellStatus(spell) {
+  if ( (spell?.type !== "spell") || (toInt(spell.system?.level) < 1) ) return { castable: false, reason: "cantrip" };
+  const mode = spell.system?.preparation?.mode || "prepared";
+  if ( !usesSlots(mode) ) return { castable: false, reason: "noSlots" };
+  if ( mode !== "prepared" ) return { castable: true, reason: null };
+  if ( spell.system.preparation?.prepared || (spell.actor?.type === "npc") || isKnownSpell(spell) ) {
+    return { castable: true, reason: null };
+  }
+  return { castable: false, reason: "notPrepared" };
+}
+
+export function isCastable(spell) {
+  return spellStatus(spell).castable;
+}
+
+/**
+ * Every spell of 1st level or higher, castable or not, each with its status:
+ * lowest level first, castable spells before the rest, then by name.
+ */
+export function spellbookSpells(actor) {
+  const spells = (actor?.items?.filter(i => (i.type === "spell") && (toInt(i.system?.level) >= 1)) ?? [])
+    .map(spell => ({ spell, status: spellStatus(spell) }));
+  return spells.sort((a, b) => (toInt(a.spell.system.level) - toInt(b.spell.system.level))
+    || (Number(b.status.castable) - Number(a.status.castable))
+    || a.spell.name.localeCompare(b.spell.name, game.i18n.lang));
 }
 
 /** The details of a spell that an infusion remembers */

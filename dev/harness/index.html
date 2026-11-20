@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Starcrafting harness</title>
+<link rel="stylesheet" href="/fonts/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/systems/dnd5e/dnd5e.css">
+<link rel="stylesheet" href="/modules/starcrafting/styles/starcrafting.css">
+<style>
+  @font-face { font-family: "Amiri"; src: url("/fonts/amiri/amiri-regular.woff2") format("woff2"); }
+  body { background: #2b2b33 url("/ui/denim075.png"); margin: 0; overflow: hidden; height: 100vh; }
+  #harness-bar { position: fixed; left: 0; right: 0; bottom: 0; height: 34px; display: flex; gap: 6px; align-items: center; padding: 0 8px; background: #111; color: #ddd; z-index: 9999; font-size: 12px; }
+  #harness-bar button { width: auto; line-height: 22px; padding: 0 8px; }
+  #chat { position: fixed; right: 0; top: 0; bottom: 34px; width: 290px; background: url("/ui/denim075.png"); z-index: 40; display: none; flex-direction: column; }
+  #chat-log { flex: 1; overflow-y: auto; list-style: none; margin: 0; padding: 6px; }
+  #notifications { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 99999; list-style: none; width: 520px; padding: 0; }
+  #notifications li { background: rgba(0,0,0,.85); color: #eee; padding: 8px 12px; border-radius: 4px; margin: 4px 0; border: 1px solid #5c87b9; }
+  #notifications li.warning { border-color: #b18404; }
+</style>
+<script src="/lib/jquery/dist/jquery.min.js"></script>
+<script src="/lib/handlebars/dist/handlebars.min.js"></script>
+</head>
+<body>
+<ol id="notifications"></ol>
+<div id="chat"><ol id="chat-log" class="chat-log"></ol></div>
+<div id="harness-bar">
+  <button data-open="aria">Wizard</button>
+  <button data-open="sorin">Sorcerer</button>
+  <button data-open="corvin">Warlock</button>
+  <button id="h-gm">Toggle GM</button>
+  <button id="h-rest">Long rest</button>
+  <button id="h-chat">Chat</button>
+  <span id="h-status"></span>
+</div>
+<script type="module">
+  import { MockActor, fireInit, mockClass } from "./foundry-mock.js";
+  await import("/modules/starcrafting/scripts/main.js");
+  fireInit();
+
+  const S = (name, level, school, img, mode = "prepared", prepared = true) => ({
+    id: name.toLowerCase().replace(/[^a-z]+/g, ""), name, img, type: "spell",
+    system: { level, school, preparation: { mode, prepared } }
+  });
+  const I = (id, name, type, img) => ({ id, name, img, type, system: { quantity: 1 } });
+  const slots = (arr, pact) => {
+    const o = {};
+    for ( let l = 1; l <= 9; l++ ) o[`spell${l}`] = { value: arr[l - 1] ?? 0, max: arr[l - 1] ?? 0, override: null, level: l };
+    o.pact = pact ?? { value: 0, max: 0, level: 0, override: null };
+    return o;
+  };
+
+  const aria = new MockActor({
+    id: "aria", name: "Aria (Wizard)", img: "icons/svg/mystery-man.svg", type: "character", ownedByPlayer: true,
+    classes: { wizard: mockClass("wizard") },
+    system: { spells: slots([4, 3, 3, 2]) },
+    items: [
+      I("sword", "Starsteel Longsword", "weapon", "icons/weapons/swords/sword-broad-crystal-paired.webp"),
+      I("staff", "Yew Staff", "weapon", "icons/weapons/staves/staff-animal-bird.webp"),
+      S("Shield", 1, "abj", "icons/magic/defensive/barrier-shield-dome-deflect-blue.webp"),
+      S("Magic Missile", 1, "evo", "icons/magic/lightning/bolt-blue.webp"),
+      S("Mage Armor", 1, "abj", "icons/magic/defensive/armor-shield-barrier-steel.webp", "always"),
+      S("Detect Magic", 1, "div", "icons/magic/perception/eye-ringed-glow-angry-large-teal.webp", "prepared", false),
+      S("Misty Step", 2, "con", "icons/magic/movement/trail-streak-impact-blue.webp"),
+      S("Fey Step", 2, "con", "icons/magic/movement/trail-streak-pink.webp", "innate", true),
+      S("Fireball", 3, "evo", "icons/magic/fire/explosion-fireball-large-orange.webp"),
+      S("Lightning Bolt", 3, "evo", "icons/magic/lightning/bolt-beam-strike-blue.webp", "prepared", false),
+      S("Fire Bolt", 0, "evo", "icons/magic/fire/beam-jet-stream-embers.webp")
+    ]
+  });
+
+  const sorin = new MockActor({
+    id: "sorin", name: "Sorin (Sorcerer)", img: "icons/svg/mystery-man.svg", type: "character", ownedByPlayer: true,
+    classes: { sorcerer: mockClass("sorcerer") },
+    system: { spells: slots([4, 3, 3]) },
+    items: [
+      I("wand", "Starsteel Wand", "equipment", "icons/weapons/wands/wand-carved-pink.webp"),
+      // Known spells, none ticked as prepared (as dnd5e leaves spells added after character creation)
+      S("Shield", 1, "abj", "icons/magic/defensive/barrier-shield-dome-deflect-blue.webp", "prepared", false),
+      S("Scorching Ray", 2, "evo", "icons/magic/fire/beam-jet-stream-blue.webp", "prepared", false),
+      S("Fireball", 3, "evo", "icons/magic/fire/explosion-fireball-large-orange.webp", "prepared", false),
+      S("Haste", 3, "trs", "icons/magic/movement/chevrons-down-yellow.webp", "prepared", false)
+    ]
+  });
+
+  const corvin = new MockActor({
+    id: "corvin", name: "Corvin (Warlock)", img: "icons/svg/mystery-man.svg", type: "character", ownedByPlayer: true,
+    classes: { warlock: mockClass("warlock", "pact") },
+    system: { spells: slots([], { value: 2, max: 2, level: 3, override: null }) },
+    items: [
+      I("blade", "Starsteel Hexblade", "weapon", "icons/weapons/swords/sword-broad-serrated-blue.webp"),
+      S("Hex", 1, "enc", "icons/magic/control/debuff-chains-green.webp", "pact"),
+      S("Hunger of Hadar", 3, "con", "icons/magic/unholy/orb-beam-pink.webp", "pact")
+    ]
+  });
+
+  game.user.character = aria;
+  const api = game.modules.get("starcrafting").api;
+  window.harness = { aria, sorin, corvin, api };
+
+  const status = () => { document.getElementById("h-status").textContent = `GM: ${game.user.isGM}`; };
+  status();
+  for ( const btn of document.querySelectorAll("[data-open]") ) {
+    btn.onclick = () => { for ( const app of api.StarforgeApp.instances.values() ) app.close(); api.open(harness[btn.dataset.open]); };
+  }
+  document.getElementById("h-gm").onclick = () => { game.user.isGM = !game.user.isGM; status(); api.StarforgeApp.refreshAll(); };
+  document.getElementById("h-chat").onclick = () => { const c = document.getElementById("chat"); c.style.display = c.style.display === "flex" ? "none" : "flex"; };
+  document.getElementById("h-rest").onclick = async () => {
+    for ( const a of [aria, sorin, corvin] ) {
+      const upd = {};
+      for ( const [k, s] of Object.entries(a.system.spells) ) upd[`system.spells.${k}.value`] = s.max;
+      await a.update(upd);
+    }
+  };
+  api.open(aria);
+</script>
+</body>
+</html>

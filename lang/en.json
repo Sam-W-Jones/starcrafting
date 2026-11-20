@@ -96,7 +96,7 @@
     },
     "Spellbook": {
       "Title": "Spellbook",
-      "Empty": "No prepared spells of 1st level or higher. Prepare spells on your character sheet to infuse them.",
+      "Empty": "No spells of 1st level or higher. Add spells on your character sheet to infuse them.",
       "SelectFirst": "Choose an item in the forge to infuse your spells into it.",
       "ItemComplete": "This item is fully infused.",
       "BoundHere": "infusing",
@@ -107,10 +107,15 @@
       "PactShort": "Pact",
       "Reason": {
         "slotsOccupied": "This item's sockets are bound to other spells.",
-        "slotComplete": "This spell is already fully infused here."
+        "slotComplete": "This spell is already fully infused here.",
+        "notPrepared": "Not prepared. Tick it as prepared on your character sheet to infuse it.",
+        "noSlots": "Cast without spell slots (innate, at-will or ritual only), so it can't be infused."
       },
       "ConfirmTitle": "Infuse {spell}?",
-      "ConfirmContent": "<p>Spend a <strong>{slot}</strong> slot to cast <strong>{spell}</strong> into the <strong>{item}</strong> (+{gain} progress)?</p>"
+      "ConfirmContent": "<p>Spend a <strong>{slot}</strong> slot to cast <strong>{spell}</strong> into the <strong>{item}</strong> (+{gain} progress)?</p>",
+      "ShowUncastable": "Show spells that can't be infused",
+      "HideUncastable": "Hide spells that can't be infused",
+      "HiddenUncastable": "{count} spell(s) that can't be infused are hidden"
     },
     "Chronicle": {
       "Title": "Chronicle",
@@ -163,7 +168,8 @@
       "notSpell": "Only spells can be dropped into a socket.",
       "spellNeedsSocket": "Drop spells onto one of the item's infusion sockets.",
       "notYourSpell": "You can only infuse spells from {actor}'s own spellbook.",
-      "notPrepared": "{spell} isn't prepared.",
+      "notPrepared": "{spell} isn't prepared. Tick it as prepared on your character sheet first.",
+      "noSlots": "{spell} is cast without spell slots, so it can't be infused.",
       "noItemSelected": "Choose an item in the forge first.",
       "noPermission": "You don't have permission to change this item.",
       "busy": "Hold on: the last cast is still settling into the item.",
@@ -173,6 +179,10 @@
       "RequireMundane": {
         "Name": "Only unenchanted items",
         "Hint": "When on, items with dnd5e's Magical property can't be placed in the Starforge. Turn off if the materials you allow are magical by nature."
+      },
+      "KnownCasters": {
+        "Name": "Classes that know their spells",
+        "Hint": "Spells from these classes or subclasses count as prepared without being ticked on the character sheet. Separate dnd5e class identifiers with commas."
       },
       "CastChat": {
         "Name": "Chat card for each cast",

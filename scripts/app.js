@@ -6,7 +6,7 @@ import {
   addItem, bindSpellToSlot, castInto, chooseEtching, getInfusion, isCasting, loggedItems, previewCast,
   removeFromLog, setAllProgress, unbindSlot
 } from "./forge.js";
-import { canCraft, castableSpells, schoolLabel, slotPools, spellLevelHeading, spellSnapshot } from "./system.js";
+import { canCraft, schoolLabel, slotPools, spellLevelHeading, spellSnapshot, spellbookSpells } from "./system.js";
 import { esc, etchingHint, etchingName, formatWhen, isEtched, levelLabel, ordinal, report, t } from "./util.js";
 
 /** How many chronicle entries the forge shows */
@@ -156,6 +156,9 @@ export class StarforgeApp extends Application {
       logEmptyText: t(mundaneOnly ? "Log.Empty" : "Log.EmptyAny"),
       dropHint: t("Forge.DropHint"),
       spellGroups: this.#spellbookContext(selected, pools),
+      showUncastable: game.settings.get(MODULE_ID, "showUncastable"),
+      uncastableToggleLabel: t(game.settings.get(MODULE_ID, "showUncastable") ? "Spellbook.HideUncastable" : "Spellbook.ShowUncastable"),
+      hiddenUncastableLabel: this._hiddenUncastable ? t("Spellbook.HiddenUncastable", { count: this._hiddenUncastable }) : "",
       spellbookHint: !selected ? t("Spellbook.SelectFirst")
         : (selected.data.status === "complete" ? t("Spellbook.ItemComplete") : "")
     };
@@ -270,19 +273,30 @@ export class StarforgeApp extends Application {
     }));
   }
 
-  /** Spells grouped by level, each with a button for every slot pool that can cast it */
+  /**
+   * Spells grouped by level, each with a button for every slot pool that can cast it.
+   * Spells that can't be infused (unprepared, or not cast with slots) are listed dimmed with the reason,
+   * unless the viewer has chosen to hide them.
+   */
   #spellbookContext(selected, pools) {
     const record = selected?.data ?? null;
     const canCast = !!record && (record.status !== "complete") && this.actor.isOwner && !isCasting(this.actor);
+    const showUncastable = game.settings.get(MODULE_ID, "showUncastable");
     const groups = new Map();
-    for ( const spell of castableSpells(this.actor) ) {
+    this._hiddenUncastable = 0;
+    for ( const { spell, status } of spellbookSpells(this.actor) ) {
+      if ( !status.castable && !showUncastable ) {
+        this._hiddenUncastable++;
+        continue;
+      }
       const snap = spellSnapshot(spell);
       const target = record ? findTargetSlot(record, snap) : null;
       const targetSlot = (target && (target.index >= 0)) ? record.slots[target.index] : null;
       // Once bound, a spell keeps the level and school it was bound at, whatever its sheet says now
       const basis = targetSlot?.spell ?? snap;
       const remaining = targetSlot?.spell ? slotProgress(targetSlot).remaining : requiredCasts(basis.level);
-      const usable = pools.filter(p => p.level >= basis.level);
+      // A spell that can't be infused gets no slot buttons, just its reason
+      const usable = status.castable ? pools.filter(p => p.level >= basis.level) : [];
       const pills = usable.map(pool => {
         const gain = castValue({ spellLevel: basis.level, slotLevel: pool.level, etching: record?.etching, school: basis.school });
         let tooltip = t(pool.pact ? "Spellbook.PactPillTooltip" : "Spellbook.PillTooltip", {
@@ -296,11 +310,12 @@ export class StarforgeApp extends Application {
           label: pool.pact ? t("Spellbook.PactShort") : ordinal(pool.level),
           gain,
           tooltip,
-          disabled: !canCast || !target || (target.index < 0) || (pool.value <= 0)
+          disabled: !status.castable || !canCast || !target || (target.index < 0) || (pool.value <= 0)
         };
       });
       let reason = "";
-      if ( record?.status === "complete" ) reason = "";
+      if ( !status.castable ) reason = t(`Spellbook.Reason.${status.reason}`);
+      else if ( record?.status === "complete" ) reason = "";
       else if ( record && target && (target.index < 0) ) reason = t(`Spellbook.Reason.${target.reason}`);
       else if ( !usable.length || usable.every(p => p.value <= 0) ) reason = t("Spellbook.NoSlotsLeft");
 
@@ -316,7 +331,8 @@ export class StarforgeApp extends Application {
         doubledHint: record ? t("Slot.Doubled", { etching: esc(etchingName(record.etching)) }) : "",
         bound: !!target && (target.index >= 0) && !target.bind,
         boundLabel: t("Spellbook.BoundHere"),
-        disabled: !!record && !!target && (target.index < 0),
+        disabled: !status.castable || (!!record && !!target && (target.index < 0)),
+        uncastable: !status.castable,
         pills,
         reason
       });
@@ -369,7 +385,10 @@ export class StarforgeApp extends Application {
   _onDragStart(event) {
     const li = event.currentTarget.closest(".sc-spell");
     const spell = this.actor.items.get(li?.dataset.spellId);
-    if ( !spell ) return;
+    if ( !spell || li.classList.contains("uncastable") ) {
+      event.preventDefault();
+      return;
+    }
     event.dataTransfer.setData("text/plain", JSON.stringify(spell.toDragData()));
   }
 
@@ -421,6 +440,8 @@ export class StarforgeApp extends Application {
         case "toggle-complete":
           this.showComplete = !this.showComplete;
           return this.render();
+        case "toggle-uncastable":
+          return game.settings.set(MODULE_ID, "showUncastable", !game.settings.get(MODULE_ID, "showUncastable"));
         case "open-item":
           return this.selectedItem?.sheet?.render(true);
         case "etching":
